@@ -3,7 +3,7 @@ import { db } from "@/db";
 import React, { useEffect, useState } from "react";
 import { ApplicationRepository } from "../../repositories/ApplicationRepository";
 import type { Application } from "../../types";
-import { columns } from "./columns";
+import { columns } from "./ApplicationColumns";
 
 function ApplicationsDatatable() {
   const [applicationsData, setApplicationsData] = useState<Application[]>([]);
