@@ -4,6 +4,10 @@ import {
 } from "@/components/ui/data-table/action-button";
 import SortableHeader from "@/components/ui/data-table/sortable-header";
 import { formatRelativeDateTime } from "@/lib/date-utils";
+import {
+  ApplicationAttendanceType,
+  ApplicationEmploymentType,
+} from "@/modules/applications/enums";
 import type { Application } from "@/modules/applications/types";
 import { Temporal } from "@js-temporal/polyfill";
 import { ColumnDef } from "@tanstack/react-table";
@@ -46,11 +50,11 @@ export const columns: ColumnDef<Application>[] = [
       const attendanceType = row.original.attendanceType;
 
       switch (attendanceType) {
-        case "on-site":
+        case ApplicationAttendanceType.OnSite:
           return "Onsite";
-        case "remote":
+        case ApplicationAttendanceType.Remote:
           return "Remote";
-        case "hybrid":
+        case ApplicationAttendanceType.Hybrid:
           return "Hybrid";
         default:
           return attendanceType;
@@ -65,15 +69,15 @@ export const columns: ColumnDef<Application>[] = [
       const employmentType = row.original.employmentType;
 
       switch (employmentType) {
-        case "full-time":
+        case ApplicationEmploymentType.FullTime:
           return "Full Time";
-        case "part-time":
+        case ApplicationEmploymentType.PartTime:
           return "Part Time";
-        case "contract":
+        case ApplicationEmploymentType.Contract:
           return "Contract";
-        case "internship":
+        case ApplicationEmploymentType.Internship:
           return "Internship";
-        case "volunteer":
+        case ApplicationEmploymentType.Volunteer:
           return "Volunteer";
         default:
           return employmentType;

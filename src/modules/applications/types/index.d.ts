@@ -2,15 +2,10 @@ import type { Company } from "@/modules/companies/types";
 import type { Contact } from "@/modules/contacts/types";
 import type { Document } from "@/modules/documents/types";
 import type { Temporal } from "@js-temporal/polyfill";
-
-export type ApplicationAttendanceType = "remote" | "hybrid" | "on-site";
-
-export type ApplicationEmploymentType =
-  | "part-time"
-  | "contract"
-  | "internship"
-  | "full-time"
-  | "volunteer";
+import type {
+  ApplicationAttendanceType,
+  ApplicationEmploymentType,
+} from "../enums";
 
 export interface Application {
   /** Unique application identifier. */

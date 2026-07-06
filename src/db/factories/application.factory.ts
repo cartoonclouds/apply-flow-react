@@ -1,5 +1,10 @@
 import { seed } from "drizzle-seed";
 
+import {
+  ApplicationAttendanceType,
+  ApplicationEmploymentType,
+} from "../../modules/applications/enums";
+
 export async function seedApplications(
   db: unknown,
   schema: unknown,
@@ -54,15 +59,19 @@ export async function seedApplications(
             precision: 1000000,
           }),
           attendanceType: funcs.valuesFromArray({
-            values: ["remote", "hybrid", "on-site"],
+            values: [
+              ApplicationAttendanceType.Remote,
+              ApplicationAttendanceType.Hybrid,
+              ApplicationAttendanceType.OnSite,
+            ],
           }),
           employmentType: funcs.valuesFromArray({
             values: [
-              "part-time",
-              "contract",
-              "internship",
-              "full-time",
-              "volunteer",
+              ApplicationEmploymentType.PartTime,
+              ApplicationEmploymentType.Contract,
+              ApplicationEmploymentType.Internship,
+              ApplicationEmploymentType.FullTime,
+              ApplicationEmploymentType.Volunteer,
             ],
           }),
           salaryMin: funcs.int({ minValue: 30000, maxValue: 120000 }),
