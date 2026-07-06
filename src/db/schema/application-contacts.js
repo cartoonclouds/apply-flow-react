@@ -19,5 +19,5 @@ export const applicationContacts = pgTable(
       .notNull()
       .default(sql`now()`),
   },
-  (t) => ({ pk: primaryKey({ columns: [t.applicationId, t.contactId] }) }),
+  (t) => [primaryKey({ columns: [t.applicationId, t.contactId] })],
 );

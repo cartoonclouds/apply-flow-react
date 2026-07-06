@@ -19,5 +19,5 @@ export const applicationDocuments = pgTable(
       .notNull()
       .default(sql`now()`),
   },
-  (t) => ({ pk: primaryKey({ columns: [t.applicationId, t.documentId] }) }),
+  (t) => [primaryKey({ columns: [t.applicationId, t.documentId] })],
 );

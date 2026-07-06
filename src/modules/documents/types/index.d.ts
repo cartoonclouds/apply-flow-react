@@ -1,3 +1,4 @@
+import type { Application } from "@/modules/applications/types";
 import type { Temporal } from "@js-temporal/polyfill";
 
 export interface Document {
@@ -15,6 +16,8 @@ export interface Document {
   sizeBytes: number | null;
   /** Content checksum, when available. */
   checksum: string | null;
+  /** Related applications, when available. */
+  applications?: Application[];
   /** Creation timestamp. */
   createdAt: Temporal.PlainDateTime;
   /** Last update timestamp. */

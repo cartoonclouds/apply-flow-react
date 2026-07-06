@@ -59,10 +59,8 @@ export async function seedRelationships(
     contactsByCompanyId.set(contact.companyId, current);
   }
 
-  const applicationContactRows: Array<{
-    applicationId: string;
-    contactId: string;
-  }> = [];
+  const applicationContactRows: Array<typeof applicationContacts.$inferInsert> =
+    [];
 
   applicationRows.forEach(
     (application: { id: string; companyId: string | null }, index: number) => {
@@ -91,6 +89,7 @@ export async function seedRelationships(
           applicationId: application.id,
           contactId:
             companyContacts[(index + relationIndex) % companyContacts.length],
+          relationType: "owner",
         });
       }
     },
@@ -117,12 +116,13 @@ export async function seedRelationships(
     return;
   }
 
-  const applicationDocumentRows = applicationRows.map(
-    (application: { id: string }, index: number) => ({
-      applicationId: application.id,
-      documentId: documentRows[index % documentRows.length].id,
-    }),
-  );
+  const applicationDocumentRows: Array<
+    typeof applicationDocuments.$inferInsert
+  > = applicationRows.map((application: { id: string }, index: number) => ({
+    applicationId: application.id,
+    documentId: documentRows[index % documentRows.length].id,
+    relationType: "attachment",
+  }));
 
   for (const relation of applicationDocumentRows) {
     await (

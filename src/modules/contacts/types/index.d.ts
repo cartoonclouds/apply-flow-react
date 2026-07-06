@@ -1,3 +1,5 @@
+import type { Application } from "@/modules/applications/types";
+import type { Company } from "@/modules/companies/types";
 import type { Temporal } from "@js-temporal/polyfill";
 
 /**
@@ -17,10 +19,14 @@ export interface Contact {
   linkedinUrl: string | null;
   /** Contact category. */
   type: ContactType;
+  /** Related company, when available. */
+  company?: Company | null;
+  /** Related applications, when available. */
+  applications?: Application[];
   /** Free-form notes about the contact. */
   notes: string | null;
   /** Associated tag identifiers. */
-  tagIds: string[];
+  tagIds?: string[];
   /** Creation timestamp. */
   createdAt: Temporal.PlainDateTime;
   /** Last update timestamp. */

@@ -1,8 +1,8 @@
 import Sidebar from "@/components/layout/Sidebar";
 import {
-    ResizableHandle,
-    ResizablePanel,
-    ResizablePanelGroup,
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { Outlet } from "@tanstack/react-router";
 import React from "react";
@@ -17,7 +17,7 @@ function App() {
         orientation="horizontal"
         className="min-h-lvh w-full rounded-lg border"
       >
-        <ResizablePanel defaultSize="15%">
+        <ResizablePanel defaultSize="15%" minSize="15%">
           <Sidebar />
         </ResizablePanel>
 

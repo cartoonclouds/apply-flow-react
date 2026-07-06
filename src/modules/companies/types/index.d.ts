@@ -1,3 +1,6 @@
+import type { Application } from "@/modules/applications/types";
+import type { Contact } from "@/modules/contacts/types";
+import type { Temporal } from "@js-temporal/polyfill";
 
 /**
  * Supported contact categories.
@@ -20,7 +23,11 @@ export interface Company {
   /** Additional notes about the company. */
   notes: string | null;
   /** Associated tag identifiers. */
-  tagIds: string[];
+  tagIds?: string[];
+  /** Related contacts, when available. */
+  contacts?: Contact[];
+  /** Related applications, when available. */
+  applications?: Application[];
   /** Free-form location text. */
   locationText: string | null;
   /** Latitude for geocoded location data. */

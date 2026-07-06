@@ -41,26 +41,11 @@ export class ApplicationRepository implements Repository<Application> {
 
     return rows.map((row) => ({
       ...row,
-      company: row.company
-        ? {
-            ...row.company,
-            tagIds: [],
-          }
-        : null,
-      contacts: row.applicationContacts
-        .map((relation) => relation.contact)
-        .filter((contact): contact is NonNullable<typeof contact> =>
-          Boolean(contact),
-        )
-        .map((contact) => ({
-          ...contact,
-          tagIds: [],
-        })),
-      documents: row.applicationDocuments
-        .map((relation) => relation.document)
-        .filter((document): document is NonNullable<typeof document> =>
-          Boolean(document),
-        ),
+      attendanceType: row.attendanceType as Application["attendanceType"],
+      employmentType: row.employmentType as Application["employmentType"],
+      company: row.company,
+      contacts: row.applicationContacts.map((relation) => relation.contact),
+      documents: row.applicationDocuments.map((relation) => relation.document),
     }));
   }
 }
