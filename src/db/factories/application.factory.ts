@@ -5,7 +5,12 @@ export async function seedApplications(
   schema: unknown,
   count = 10,
 ) {
-  const applications = (schema as { applications?: unknown }).applications;
+  const typedSchema = schema as {
+    applications?: any;
+    companies?: any;
+  };
+  const applications = typedSchema.applications;
+  const companies = typedSchema.companies;
 
   if (!applications) {
     throw new Error(
@@ -13,12 +18,27 @@ export async function seedApplications(
     );
   }
 
+  if (!companies) {
+    throw new Error(
+      "companies table is required for application relationships",
+    );
+  }
+
+  const companyRows = await (db as any)
+    .select({ id: companies.id })
+    .from(companies);
+  const companyIds = companyRows.map((row: { id: string }) => row.id);
+
+  if (companyIds.length === 0) {
+    throw new Error("seedApplications requires at least one seeded company");
+  }
+
   await (seed(db as any, { applications } as any, { count }) as any).refine(
     (funcs: any) => ({
       applications: {
         columns: {
           id: funcs.uuid(),
-          companyId: funcs.default({ defaultValue: null }),
+          companyId: funcs.valuesFromArray({ values: companyIds }),
           title: funcs.jobTitle(),
           url: funcs.default({ defaultValue: "https://example.com/job" }),
           appliedAt: funcs.timestamp(),

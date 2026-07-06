@@ -1,6 +1,6 @@
 import {
-    ACTION_BUTTON_SEPARATOR,
-    ActionButton,
+  ACTION_BUTTON_SEPARATOR,
+  ActionButton,
 } from "@/components/ui/data-table/action-button";
 import SortableHeader from "@/components/ui/data-table/sortable-header";
 import { formatRelativeDateTime } from "@/lib/date-utils";
@@ -29,8 +29,9 @@ function asPlainDateTime(value: unknown): Temporal.PlainDateTime | null {
 
 export const columns: ColumnDef<Application>[] = [
   {
-    accessorKey: "companyId",
+    accessorKey: "companyName",
     header: ({ column }) => SortableHeader({ label: "Company", column }),
+    cell: ({ row }) => row.original.company?.name ?? "-",
   },
   {
     accessorKey: "title",

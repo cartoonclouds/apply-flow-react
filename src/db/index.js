@@ -1,6 +1,6 @@
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
-import * as schema from "./schema.js";
+import * as schema from "./schema/index.js";
 
 const databaseName = import.meta.env?.VITE_DATABASE_NAME || "jaa-react";
 

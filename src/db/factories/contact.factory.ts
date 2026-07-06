@@ -1,10 +1,28 @@
 import { seed } from "drizzle-seed";
 
 export async function seedContacts(db: unknown, schema: unknown, count = 10) {
-  const contacts = (schema as { contacts?: unknown }).contacts;
+  const typedSchema = schema as {
+    contacts?: any;
+    companies?: any;
+  };
+  const contacts = typedSchema.contacts;
+  const companies = typedSchema.companies;
 
   if (!contacts) {
     throw new Error("contacts table is required in schema for contact seeding");
+  }
+
+  if (!companies) {
+    throw new Error("companies table is required for contact relationships");
+  }
+
+  const companyRows = await (db as any)
+    .select({ id: companies.id })
+    .from(companies);
+  const companyIds = companyRows.map((row: { id: string }) => row.id);
+
+  if (companyIds.length === 0) {
+    throw new Error("seedContacts requires at least one seeded company");
   }
 
   await (seed(db as any, { contacts } as any, { count }) as any).refine(
@@ -12,7 +30,7 @@ export async function seedContacts(db: unknown, schema: unknown, count = 10) {
       contacts: {
         columns: {
           id: funcs.uuid(),
-          companyId: funcs.default({ defaultValue: null }),
+          companyId: funcs.valuesFromArray({ values: companyIds }),
           fullName: funcs.fullName(),
           email: funcs.email(),
           phone: funcs.phoneNumber(),

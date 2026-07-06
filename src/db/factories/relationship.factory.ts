@@ -1,72 +1,143 @@
-import { PGlite } from "@electric-sql/pglite";
+import { seed } from "drizzle-seed";
 
-export async function seedRelationships(client: PGlite): Promise<void> {
-  const statements = [
-    `WITH indexed_contacts AS (
-      SELECT id, row_number() OVER (ORDER BY id) - 1 AS rn
-      FROM contacts
-    ), indexed_companies AS (
-      SELECT id, row_number() OVER (ORDER BY id) - 1 AS rn
-      FROM companies
-    ), company_count AS (
-      SELECT count(*)::int AS cnt
-      FROM companies
-    )
-    UPDATE contacts AS c
-    SET company_id = ic.id
-    FROM indexed_contacts ict
-    JOIN company_count cc ON cc.cnt > 0
-    JOIN indexed_companies ic ON ic.rn = (ict.rn % cc.cnt)
-    WHERE c.id = ict.id;`,
-    `WITH indexed_applications AS (
-      SELECT id, row_number() OVER (ORDER BY id) - 1 AS rn
-      FROM applications
-    ), indexed_companies AS (
-      SELECT id, row_number() OVER (ORDER BY id) - 1 AS rn
-      FROM companies
-    ), company_count AS (
-      SELECT count(*)::int AS cnt
-      FROM companies
-    )
-    UPDATE applications AS a
-    SET company_id = ic.id
-    FROM indexed_applications ia
-    JOIN company_count cc ON cc.cnt > 0
-    JOIN indexed_companies ic ON ic.rn = (ia.rn % cc.cnt)
-    WHERE a.id = ia.id;`,
-    `WITH indexed_applications AS (
-      SELECT id, row_number() OVER (ORDER BY id) - 1 AS rn
-      FROM applications
-    ), indexed_contacts AS (
-      SELECT id, row_number() OVER (ORDER BY id) - 1 AS rn
-      FROM contacts
-    ), contact_count AS (
-      SELECT count(*)::int AS cnt
-      FROM contacts
-    )
-    INSERT INTO application_contacts (application_id, contact_id, relation_type, created_at)
-    SELECT ia.id, ic.id, 'owner', now()
-    FROM indexed_applications ia
-    JOIN contact_count cc ON cc.cnt > 0
-    JOIN indexed_contacts ic ON ic.rn = (ia.rn % cc.cnt);`,
-    `WITH indexed_applications AS (
-      SELECT id, row_number() OVER (ORDER BY id) - 1 AS rn
-      FROM applications
-    ), indexed_documents AS (
-      SELECT id, row_number() OVER (ORDER BY id) - 1 AS rn
-      FROM documents
-    ), document_count AS (
-      SELECT count(*)::int AS cnt
-      FROM documents
-    )
-    INSERT INTO application_documents (application_id, document_id, relation_type, created_at)
-    SELECT ia.id, idoc.id, 'attachment', now()
-    FROM indexed_applications ia
-    JOIN document_count dc ON dc.cnt > 0
-    JOIN indexed_documents idoc ON idoc.rn = (ia.rn % dc.cnt);`,
-  ];
+function countRelationsForApplication(index: number): number {
+  return (index % 3) + 1;
+}
 
-  for (const statement of statements) {
-    await client.exec(statement);
+export async function seedRelationships(
+  db: unknown,
+  schema: unknown,
+): Promise<void> {
+  const typedSchema = schema as {
+    applications?: any;
+    contacts?: any;
+    documents?: any;
+    applicationContacts?: any;
+    applicationDocuments?: any;
+  };
+
+  const applications = typedSchema.applications;
+  const contacts = typedSchema.contacts;
+  const documents = typedSchema.documents;
+  const applicationContacts = typedSchema.applicationContacts;
+  const applicationDocuments = typedSchema.applicationDocuments;
+
+  if (
+    !applications ||
+    !contacts ||
+    !documents ||
+    !applicationContacts ||
+    !applicationDocuments
+  ) {
+    throw new Error(
+      "relationship seeding requires applications, contacts, documents, and junction tables",
+    );
+  }
+
+  const applicationRows: Array<{ id: string; companyId: string | null }> =
+    await (db as any)
+      .select({ id: applications.id, companyId: applications.companyId })
+      .from(applications);
+  const contactRows: Array<{ id: string; companyId: string | null }> = await (
+    db as any
+  )
+    .select({ id: contacts.id, companyId: contacts.companyId })
+    .from(contacts);
+  const documentRows: Array<{ id: string }> = await (db as any)
+    .select({ id: documents.id })
+    .from(documents);
+
+  const contactsByCompanyId = new Map<string, string[]>();
+
+  for (const contact of contactRows) {
+    if (!contact.companyId) {
+      continue;
+    }
+
+    const current = contactsByCompanyId.get(contact.companyId) ?? [];
+    current.push(contact.id);
+    contactsByCompanyId.set(contact.companyId, current);
+  }
+
+  const applicationContactRows: Array<{
+    applicationId: string;
+    contactId: string;
+  }> = [];
+
+  applicationRows.forEach(
+    (application: { id: string; companyId: string | null }, index: number) => {
+      if (!application.companyId) {
+        return;
+      }
+
+      const companyContacts =
+        contactsByCompanyId.get(application.companyId) ?? [];
+
+      if (companyContacts.length === 0) {
+        return;
+      }
+
+      const relationCount = Math.min(
+        countRelationsForApplication(index),
+        companyContacts.length,
+      );
+
+      for (
+        let relationIndex = 0;
+        relationIndex < relationCount;
+        relationIndex += 1
+      ) {
+        applicationContactRows.push({
+          applicationId: application.id,
+          contactId:
+            companyContacts[(index + relationIndex) % companyContacts.length],
+        });
+      }
+    },
+  );
+
+  for (const relation of applicationContactRows) {
+    await (
+      seed(db as any, { applicationContacts } as any, { count: 1 }) as any
+    ).refine((funcs: any) => ({
+      applicationContacts: {
+        columns: {
+          applicationId: funcs.default({
+            defaultValue: relation.applicationId,
+          }),
+          contactId: funcs.default({ defaultValue: relation.contactId }),
+          relationType: funcs.default({ defaultValue: "owner" }),
+          createdAt: funcs.timestamp(),
+        },
+      },
+    }));
+  }
+
+  if (documentRows.length === 0) {
+    return;
+  }
+
+  const applicationDocumentRows = applicationRows.map(
+    (application: { id: string }, index: number) => ({
+      applicationId: application.id,
+      documentId: documentRows[index % documentRows.length].id,
+    }),
+  );
+
+  for (const relation of applicationDocumentRows) {
+    await (
+      seed(db as any, { applicationDocuments } as any, { count: 1 }) as any
+    ).refine((funcs: any) => ({
+      applicationDocuments: {
+        columns: {
+          applicationId: funcs.default({
+            defaultValue: relation.applicationId,
+          }),
+          documentId: funcs.default({ defaultValue: relation.documentId }),
+          relationType: funcs.default({ defaultValue: "attachment" }),
+          createdAt: funcs.timestamp(),
+        },
+      },
+    }));
   }
 }

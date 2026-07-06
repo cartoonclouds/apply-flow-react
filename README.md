@@ -1,30 +1,30 @@
 # JAA React
 
-A modern React + Vite application with SQLite database, state management, and shadcn/ui components.
+A modern React + Vite application with Drizzle ORM + PGlite, state management, and shadcn/ui components.
 
 ## Quick Start
 
 ```bash
 # Install dependencies
-bun install
+npm install
 
 # Start dev server
-bun run dev
+npm run dev
 
 # Generate DB migrations
-bun run db:generate
+npm run db:generate
 
-# Apply migrations
-bun run db:migrate
+# Apply migrations (runtime migrator)
+npm run db:migrate
 
 # Open Drizzle Studio (interactive DB explorer)
-bun run db:studio
+npm run db:studio
 
 # Build for production
-bun run build
+npm run build
 
 # Lint code
-bun run lint
+npm run lint
 ```
 
 ## Dependencies
@@ -36,7 +36,6 @@ bun run lint
 | **react**                      | 19.2.7  | UI library for building interactive interfaces           | [facebook/react](https://github.com/facebook/react)                     |
 | **react-dom**                  | 19.2.7  | React DOM rendering library                              | [facebook/react](https://github.com/facebook/react)                     |
 | **drizzle-orm**                | 0.45.2  | TypeScript ORM for SQL databases with type safety        | [drizzle-team/drizzle-orm](https://github.com/drizzle-team/drizzle-orm) |
-| **better-sqlite3**             | 12.11.1 | Synchronous SQLite database driver for Node.js           | [WiseLibs/better-sqlite3](https://github.com/WiseLibs/better-sqlite3)   |
 | **zustand**                    | 5.0.14  | Lightweight state management library (~2KB)              | [pmndrs/zustand](https://github.com/pmndrs/zustand)                     |
 | **tailwindcss**                | 4.3.2   | Utility-first CSS framework                              | [tailwindlabs/tailwindcss](https://github.com/tailwindlabs/tailwindcss) |
 | **class-variance-authority**   | 0.7.1   | Utility for managing component class variants            | [joe-bell/cva](https://github.com/joe-bell/cva)                         |
@@ -77,7 +76,16 @@ src/
 │       └── table.jsx
 ├── db/
 │   ├── index.js          # Database connection instance
-│   └── schema.js         # Drizzle ORM schema definitions
+│   └── schema/           # Drizzle ORM schema definitions
+│       ├── index.js
+│       ├── enums.js
+│       ├── companies.js
+│       ├── contacts.js
+│       ├── applications.js
+│       ├── documents.js
+│       ├── application-documents.js
+│       ├── application-contacts.js
+│       └── relations.js
 ├── lib/
 │   └── utils.js          # Utility functions (cn helper)
 ├── store/
@@ -87,9 +95,9 @@ src/
 
 ## Key Features
 
-### Database (Drizzle ORM + SQLite)
+### Database (Drizzle ORM + PGlite)
 
-Fully typed SQLite database with 6 tables:
+Fully typed Drizzle schema with 6 tables:
 
 - **companies** — job posting companies
 - **contacts** — recruiters and company contacts
@@ -102,7 +110,7 @@ Fully typed SQLite database with 6 tables:
 
 ```js
 import { db } from "@/db/index.js";
-import { applications, companies } from "@/db/schema.js";
+import { applications, companies } from "@/db/schema";
 
 const apps = await db.query.applications.findMany({
   with: { company: true },
@@ -141,15 +149,15 @@ Add more: `bun x --bun shadcn@latest add <component>`
 
 ## Scripts
 
-| Script        | Command                | Purpose                                     |
-| ------------- | ---------------------- | ------------------------------------------- |
-| `dev`         | `vite`                 | Start dev server at `http://localhost:5173` |
-| `build`       | `vite build`           | Build for production → `dist/`              |
-| `preview`     | `vite preview`         | Preview production build locally            |
-| `lint`        | `oxlint`               | Lint code with oxlint                       |
-| `db:generate` | `drizzle-kit generate` | Generate SQL migrations from schema         |
-| `db:migrate`  | `drizzle-kit migrate`  | Apply pending migrations to database        |
-| `db:studio`   | `drizzle-kit studio`   | Open interactive Drizzle Studio UI          |
+| Script        | Command                            | Purpose                                                |
+| ------------- | ---------------------------------- | ------------------------------------------------------ |
+| `dev`         | `vite`                             | Start dev server at `http://localhost:5173`            |
+| `build`       | `vite build`                       | Build for production → `dist/`                         |
+| `preview`     | `vite preview`                     | Preview production build locally                       |
+| `lint`        | `oxlint`                           | Lint code with oxlint                                  |
+| `db:generate` | `drizzle-kit generate`             | Generate SQL migrations from schema                    |
+| `db:migrate`  | `node scripts/migrate-runtime.mjs` | Apply pending migrations with Drizzle runtime migrator |
+| `db:studio`   | `drizzle-kit studio`               | Open interactive Drizzle Studio UI                     |
 
 ## Configuration Files
 

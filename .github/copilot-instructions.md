@@ -33,6 +33,12 @@ React.useEffect(() => {
 - When generating code, import the specific symbol/component/hook that is used.
 - Avoid wildcard or namespace-style usage unless explicitly required by an external API.
 
+## Type File Naming
+
+- Name type-only files using the declaration-file format `*.d.ts`.
+- Do not create type-only files as `*.ts`.
+- When migrating existing type-only files from `*.ts`, rename them to matching `*.d.ts` names.
+
 ## TanStack Router Import Style
 
 - Prefer named imports from `@tanstack/react-router`.

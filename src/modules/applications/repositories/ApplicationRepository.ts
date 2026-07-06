@@ -23,6 +23,44 @@ export class ApplicationRepository implements Repository<Application> {
   }
 
   public async list(): Promise<Application[]> {
-    return this.db.select().from(schema.applications);
+    const rows = await this.db.query.applications.findMany({
+      with: {
+        company: true,
+        applicationContacts: {
+          with: {
+            contact: true,
+          },
+        },
+        applicationDocuments: {
+          with: {
+            document: true,
+          },
+        },
+      },
+    });
+
+    return rows.map((row) => ({
+      ...row,
+      company: row.company
+        ? {
+            ...row.company,
+            tagIds: [],
+          }
+        : null,
+      contacts: row.applicationContacts
+        .map((relation) => relation.contact)
+        .filter((contact): contact is NonNullable<typeof contact> =>
+          Boolean(contact),
+        )
+        .map((contact) => ({
+          ...contact,
+          tagIds: [],
+        })),
+      documents: row.applicationDocuments
+        .map((relation) => relation.document)
+        .filter((document): document is NonNullable<typeof document> =>
+          Boolean(document),
+        ),
+    }));
   }
 }

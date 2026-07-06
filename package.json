@@ -9,7 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "node scripts/migrate-runtime.mjs",
     "db:studio": "drizzle-kit studio",
     "db:factories": "bun run src/db/factories/run-all.ts"
   },
@@ -41,7 +41,7 @@
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.3",
-    "drizzle-kit": "^0.18.1",
+    "drizzle-kit": "^0.31.10",
     "oxlint": "1.71.0",
     "tailwindcss": "4.3.2",
     "vite": "8.1.1"

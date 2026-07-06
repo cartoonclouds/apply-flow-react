@@ -1,3 +1,6 @@
+import type { Company } from "@/modules/companies/types";
+import type { Contact } from "@/modules/contacts/types";
+import type { Document } from "@/modules/documents/types";
 import type { Temporal } from "@js-temporal/polyfill";
 
 export type ApplicationAttendanceType = "remote" | "hybrid" | "on-site";
@@ -50,4 +53,12 @@ export interface Application {
   createdAt: Temporal.PlainDateTime;
   /** Last update timestamp. */
   updatedAt: Temporal.PlainDateTime;
+
+  /** Relations */
+  /** Related company, when available. */
+  company?: Company | null;
+  /** Related contacts, when available. */
+  contacts?: Contact[];
+  /** Related documents, when available. */
+  documents?: Document[];
 }
