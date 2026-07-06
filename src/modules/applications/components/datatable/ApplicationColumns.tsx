@@ -29,7 +29,8 @@ function asPlainDateTime(value: unknown): Temporal.PlainDateTime | null {
 
 export const columns: ColumnDef<Application>[] = [
   {
-    accessorKey: "companyName",
+    id: "companyName",
+    accessorFn: (row) => row.company?.name ?? "",
     header: ({ column }) => SortableHeader({ label: "Company", column }),
     cell: ({ row }) => row.original.company?.name ?? "-",
   },
