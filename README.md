@@ -11,6 +11,9 @@ npm install
 # Start dev server
 npm run dev
 
+# Start desktop app (Tauri)
+npm run tauri:dev
+
 # Generate DB migrations
 npm run db:generate
 
@@ -22,6 +25,9 @@ npm run db:studio
 
 # Build for production
 npm run build
+
+# Build desktop app installers/bundles
+npm run tauri:build
 
 # Lint code
 npm run lint

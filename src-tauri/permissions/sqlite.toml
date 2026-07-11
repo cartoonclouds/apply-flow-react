@@ -1,0 +1,9 @@
+[[permission]]
+identifier = "allow-read-sqlite-database"
+description = "Allows reading metadata from a local SQLite database path via the read_sqlite_database command."
+commands.allow = ["read_sqlite_database"]
+
+[[permission]]
+identifier = "deny-read-sqlite-database"
+description = "Denies reading metadata from a local SQLite database path via the read_sqlite_database command."
+commands.deny = ["read_sqlite_database"]

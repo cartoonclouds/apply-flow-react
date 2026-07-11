@@ -17,7 +17,7 @@ function App() {
         orientation="horizontal"
         className="min-h-lvh w-full rounded-lg border"
       >
-        <ResizablePanel defaultSize="15%" minSize="15%">
+        <ResizablePanel defaultSize="15%" minSize="15%" maxSize="50%">
           <Sidebar />
         </ResizablePanel>
 

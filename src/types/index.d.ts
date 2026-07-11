@@ -16,10 +16,15 @@ export type User = {
   email: string;
 };
 
-export interface Repository<T = unknown> {
-  list(): Promise<T[]>;
-  get(id: number): Promise<T | null>;
-  create(data: Partial<T>): Promise<T>;
-  update(id: number, data: Partial<T>): Promise<T>;
-  delete(id: number): Promise<void>;
+export interface Repository<
+  TEntity = unknown,
+  TCreate = Partial<TEntity>,
+  TUpdate = Partial<TCreate>,
+  TId = number,
+> {
+  list(): Promise<TEntity[]>;
+  get(id: TId): Promise<TEntity | null>;
+  create(data: TCreate): Promise<TEntity>;
+  update(id: TId, data: TUpdate): Promise<TEntity>;
+  delete(id: TId): Promise<void>;
 }
