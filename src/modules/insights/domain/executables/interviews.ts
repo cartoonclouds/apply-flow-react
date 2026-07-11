@@ -1,20 +1,34 @@
 import { DrizzleAppDatabase } from "@/db";
-import { Waves } from "lucide-react";
+import { Minus, Waves } from "lucide-react";
 import { IInsight, InsightViewDefinition } from "../../types";
 
 export class Interviews implements IInsight {
+  private value = 0;
+
   constructor(private readonly db: DrizzleAppDatabase) {}
 
-  public execute(): Promise<number> {
-    return Promise.resolve(12);
+  public async execute(): Promise<number> {
+    const applications = await this.db.query.applications.findMany();
+
+    this.value = applications.filter((application) => {
+      const process = application.interviewProcess?.trim();
+      return Boolean(process);
+    }).length;
+
+    return this.value;
   }
 
   public toView(): InsightViewDefinition {
     return {
       title: "Interviews",
       description: "The number of interviews that are currently scheduled.",
-      value: 12,
-      icon: Waves, // Replace with the actual icon component or identifier
+      value: this.value,
+      subValue: {
+        text: `${this.value} applications include interview tracking`,
+        direction: "neutral",
+        icon: Minus,
+      },
+      icon: Waves,
       color: "green",
     };
   }

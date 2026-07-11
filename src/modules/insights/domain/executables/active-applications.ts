@@ -1,25 +1,34 @@
 import { DrizzleAppDatabase } from "@/db";
-import { Activity, TrendingUp } from "lucide-react";
+import { Activity, Minus } from "lucide-react";
 import { IInsight, InsightViewDefinition } from "../../types";
 
 export class ActiveApplications implements IInsight {
+  private value = 0;
+
   constructor(private readonly db: DrizzleAppDatabase) {}
 
-  public execute(): Promise<number> {
-    return Promise.resolve(28);
+  public async execute(): Promise<number> {
+    const applications = await this.db.query.applications.findMany();
+    this.value = applications.filter((application) => {
+      const isArchived = Boolean(application.isArchived);
+      const isDeleted = Boolean(application.deletedAt);
+      return !isArchived && !isDeleted;
+    }).length;
+
+    return this.value;
   }
 
   public toView(): InsightViewDefinition {
     return {
       title: "Active Applications",
       description: "The number of applications that are currently active.",
-      value: 28,
+      value: this.value,
       subValue: {
-        text: "<b>+6</b> since last week",
-        direction: "up",
-        icon: TrendingUp, // Replace with the actual icon component or identifier
+        text: `${this.value} active in pipeline`,
+        direction: "neutral",
+        icon: Minus,
       },
-      icon: Activity, // Replace with the actual icon component or identifier
+      icon: Activity,
       color: "blue",
     };
   }

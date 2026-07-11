@@ -3,33 +3,15 @@ import {
   ActionButton,
 } from "@/components/ui/data-table/action-button";
 import SortableHeader from "@/components/ui/data-table/sortable-header";
+import { sortTemporalColumn } from "@/components/ui/data-table/temporal-sorting";
 import { formatRelativeDateTime } from "@/lib/date-utils";
 import {
   ApplicationAttendanceType,
   ApplicationEmploymentType,
 } from "@/modules/applications/enums";
 import type { Application } from "@/modules/applications/types";
-import { Temporal } from "@js-temporal/polyfill";
 import { ColumnDef } from "@tanstack/react-table";
 import React from "react";
-
-function asPlainDateTime(value: unknown): Temporal.PlainDateTime | null {
-  if (value instanceof Temporal.PlainDateTime) {
-    return value;
-  }
-
-  if (typeof value === "string") {
-    try {
-      return Temporal.PlainDateTime.from(
-        value.replace(" ", "T").replace("Z", ""),
-      );
-    } catch {
-      return null;
-    }
-  }
-
-  return null;
-}
 
 export const columns: ColumnDef<Application>[] = [
   {
@@ -91,24 +73,7 @@ export const columns: ColumnDef<Application>[] = [
   {
     accessorKey: "updatedAt",
     header: ({ column }) => SortableHeader({ label: "Updated At", column }),
-    sortingFn: (rowA, rowB, columnId) => {
-      const a = asPlainDateTime(rowA.getValue(columnId));
-      const b = asPlainDateTime(rowB.getValue(columnId));
-
-      if (!a && !b) {
-        return 0;
-      }
-
-      if (!a) {
-        return 1;
-      }
-
-      if (!b) {
-        return -1;
-      }
-
-      return Temporal.PlainDateTime.compare(a, b);
-    },
+    sortingFn: sortTemporalColumn,
     cell: ({ row }) => {
       return formatRelativeDateTime(row.original.updatedAt);
     },

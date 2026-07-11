@@ -1,6 +1,11 @@
 import type { LucideIcon } from "lucide-react";
 
-export type AppRoute = "/" | "/applications" | "/calendar";
+export type AppRoute =
+  | "/"
+  | "/applications"
+  | "/calendar"
+  | "/companies"
+  | "/contacts";
 
 export type MenuItem = {
   id: number;

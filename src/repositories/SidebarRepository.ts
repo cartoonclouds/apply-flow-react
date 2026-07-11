@@ -1,6 +1,12 @@
 import type { DrizzleAppDatabase } from "@/db";
 import { MenuItem } from "@/types";
-import { Briefcase, CalendarIcon, LayoutDashboard } from "lucide-react";
+import {
+  Briefcase,
+  Building2,
+  CalendarIcon,
+  LayoutDashboard,
+  Users,
+} from "lucide-react";
 
 export class SidebarRepository {
   constructor(private readonly _db: DrizzleAppDatabase) {}
@@ -24,6 +30,18 @@ export class SidebarRepository {
         label: "Calendar",
         icon: CalendarIcon,
         route: "/calendar",
+      },
+      {
+        id: 4,
+        label: "Companies",
+        icon: Building2,
+        route: "/companies",
+      },
+      {
+        id: 5,
+        label: "Contacts",
+        icon: Users,
+        route: "/contacts",
       },
     ];
   }
