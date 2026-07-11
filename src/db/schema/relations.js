@@ -17,7 +17,7 @@ export const contactsRelations = relations(contacts, ({ one, many }) => ({
     fields: [contacts.companyId],
     references: [companies.id],
   }),
-  applicationContacts: many(applicationContacts),
+  applications: many(applicationContacts),
 }));
 
 export const applicationsRelations = relations(
@@ -27,13 +27,13 @@ export const applicationsRelations = relations(
       fields: [applications.companyId],
       references: [companies.id],
     }),
-    applicationDocuments: many(applicationDocuments),
-    applicationContacts: many(applicationContacts),
+    documents: many(applicationDocuments),
+    contacts: many(applicationContacts),
   }),
 );
 
 export const documentsRelations = relations(documents, ({ many }) => ({
-  applicationDocuments: many(applicationDocuments),
+  application: many(applicationDocuments),
 }));
 
 export const applicationDocumentsRelations = relations(

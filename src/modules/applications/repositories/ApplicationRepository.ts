@@ -30,12 +30,12 @@ export class ApplicationRepository implements Repository<
     const applicationRows = await this.db.query.applications.findMany({
       with: {
         company: true,
-        applicationContacts: {
+        contacts: {
           with: {
             contact: true,
           },
         },
-        applicationDocuments: {
+        documents: {
           with: {
             document: true,
           },
@@ -48,12 +48,12 @@ export class ApplicationRepository implements Repository<
       attendanceType: row.attendanceType as Application["attendanceType"],
       employmentType: row.employmentType as Application["employmentType"],
       company: row.company,
-      contacts: row.applicationContacts
+      contacts: row.contacts
         .map((relation) => relation.contact)
         .filter((contact): contact is NonNullable<typeof contact> =>
           Boolean(contact),
         ),
-      documents: row.applicationDocuments
+      documents: row.documents
         .map((relation) => relation.document)
         .filter((document): document is NonNullable<typeof document> =>
           Boolean(document),
