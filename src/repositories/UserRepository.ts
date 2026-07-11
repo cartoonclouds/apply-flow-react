@@ -1,3 +1,4 @@
+import type { DrizzleAppDatabase } from "@/db";
 import { Repository, User } from "@/types";
 
 type NewUser = Omit<User, "id">;
@@ -8,7 +9,7 @@ export class UserRepository implements Repository<
   Partial<NewUser>,
   number
 > {
-  constructor(private readonly db: any) {}
+  constructor(private readonly _db: DrizzleAppDatabase) {}
 
   public async list(): Promise<User[]> {
     return [

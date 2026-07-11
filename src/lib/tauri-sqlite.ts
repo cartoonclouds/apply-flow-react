@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { invokeTauri } from "@/db/runtime";
 
 export interface SqliteMetadata {
   filePath: string;
@@ -15,7 +15,7 @@ export async function readLocalSqliteDatabase(
     throw new Error("Database path cannot be empty.");
   }
 
-  return invoke<SqliteMetadata>("read_sqlite_database", {
+  return invokeTauri<SqliteMetadata>("read_sqlite_database", {
     path: normalizedPath,
   });
 }

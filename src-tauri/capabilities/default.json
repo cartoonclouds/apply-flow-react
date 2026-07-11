@@ -3,5 +3,9 @@
   "identifier": "default",
   "description": "enables the default permissions",
   "windows": ["main"],
-  "permissions": ["core:default", "allow-read-sqlite-database"]
+  "permissions": [
+    "core:default",
+    "allow-read-sqlite-database",
+    "allow-execute-sqlite-query"
+  ]
 }

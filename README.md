@@ -17,6 +17,9 @@ npm run tauri:dev
 # Generate DB migrations
 npm run db:generate
 
+# Sync dedicated SQLite migrations from drizzle/ to drizzle-sqlite/
+npm run db:sync:sqlite
+
 # Apply migrations (runtime migrator)
 npm run db:migrate
 
@@ -31,6 +34,21 @@ npm run tauri:build
 
 # Lint code
 npm run lint
+```
+
+## Database Backend Selection
+
+The app can run Drizzle with either browser IndexedDB storage or a Tauri SQLite file, controlled by env variables.
+
+- `VITE_DB_DRIVER=indexeddb` (default): Uses PGlite persisted to IndexedDB (`idb://...`).
+- `VITE_DB_DRIVER=tauri-sqlite`: Uses Drizzle SQLite proxy over a Tauri command that executes parameterized queries against a local SQLite file.
+- `VITE_TAURI_SQLITE_PATH`: Absolute path to the SQLite file when `VITE_DB_DRIVER=tauri-sqlite`.
+
+Example:
+
+```bash
+VITE_DB_DRIVER=tauri-sqlite
+VITE_TAURI_SQLITE_PATH=C:/Users/you/Documents/applyflow.db
 ```
 
 ## Dependencies
@@ -155,15 +173,16 @@ Add more: `bun x --bun shadcn@latest add <component>`
 
 ## Scripts
 
-| Script        | Command                            | Purpose                                                |
-| ------------- | ---------------------------------- | ------------------------------------------------------ |
-| `dev`         | `vite`                             | Start dev server at `http://localhost:5173`            |
-| `build`       | `vite build`                       | Build for production → `dist/`                         |
-| `preview`     | `vite preview`                     | Preview production build locally                       |
-| `lint`        | `oxlint`                           | Lint code with oxlint                                  |
-| `db:generate` | `drizzle-kit generate`             | Generate SQL migrations from schema                    |
-| `db:migrate`  | `node scripts/migrate-runtime.mjs` | Apply pending migrations with Drizzle runtime migrator |
-| `db:studio`   | `drizzle-kit studio`               | Open interactive Drizzle Studio UI                     |
+| Script           | Command                                          | Purpose                                                 |
+| ---------------- | ------------------------------------------------ | ------------------------------------------------------- |
+| `dev`            | `vite`                                           | Start dev server at `http://localhost:5173`             |
+| `build`          | `vite build`                                     | Build for production → `dist/`                          |
+| `preview`        | `vite preview`                                   | Preview production build locally                        |
+| `lint`           | `oxlint`                                         | Lint code with oxlint                                   |
+| `db:generate`    | `drizzle-kit generate && npm run db:sync:sqlite` | Generate SQL migrations from schema and sync SQLite set |
+| `db:sync:sqlite` | `node scripts/sync-sqlite-migrations.mjs`        | Regenerate dedicated SQLite migrations from Drizzle SQL |
+| `db:migrate`     | `node scripts/migrate-runtime.mjs`               | Apply pending migrations with Drizzle runtime migrator  |
+| `db:studio`      | `drizzle-kit studio`                             | Open interactive Drizzle Studio UI                      |
 
 ## Configuration Files
 

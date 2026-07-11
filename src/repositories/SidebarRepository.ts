@@ -1,8 +1,9 @@
+import type { DrizzleAppDatabase } from "@/db";
 import { MenuItem } from "@/types";
 import { Briefcase, CalendarIcon, LayoutDashboard } from "lucide-react";
 
 export class SidebarRepository {
-  constructor(private db: any) {}
+  constructor(private readonly _db: DrizzleAppDatabase) {}
 
   public list(): MenuItem[] {
     return [

@@ -11,7 +11,8 @@
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
-    "db:generate": "drizzle-kit generate",
+    "db:generate": "drizzle-kit generate && npm run db:sync:sqlite",
+    "db:sync:sqlite": "node scripts/sync-sqlite-migrations.mjs",
     "db:migrate": "node scripts/migrate-runtime.mjs",
     "db:studio": "drizzle-kit studio",
     "db:factories": "bun run src/db/factories/run-all.ts"

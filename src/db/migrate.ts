@@ -1,5 +1,7 @@
 import type { PgliteDatabase } from "drizzle-orm/pglite";
+import sqliteJournal from "../../drizzle-sqlite/meta/_journal.json";
 import journal from "../../drizzle/meta/_journal.json";
+import { SQLITE_MIGRATIONS_TABLE, executeSqlite } from "./runtime";
 
 type BrowserMigratableDatabase = {
   dialect: {
@@ -22,6 +24,19 @@ const browserMigrationModules = import.meta.glob("../../drizzle/*.sql", {
   eager: true,
 }) as Record<string, string>;
 
+const sqliteMigrationModules = import.meta.glob("../../drizzle-sqlite/*.sql", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+}) as Record<string, string>;
+
+function splitMigrationStatements(sqlText: string): string[] {
+  return sqlText
+    .split("--> statement-breakpoint")
+    .map((statement) => statement.trim())
+    .filter((statement) => statement.length > 0);
+}
+
 function getBrowserMigrations() {
   return journal.entries.map((entry) => {
     const migrationPath = `../../drizzle/${entry.tag}.sql`;
@@ -32,15 +47,36 @@ function getBrowserMigrations() {
     }
 
     return {
-      sql: sqlText
-        .split("--> statement-breakpoint")
-        .map((statement) => statement.trim())
-        .filter((statement) => statement.length > 0),
+      sql: splitMigrationStatements(sqlText),
       bps: entry.breakpoints,
       folderMillis: entry.when,
       hash: entry.tag,
     };
   });
+}
+
+function getSqliteMigrations() {
+  return sqliteJournal.entries.map((entry) => {
+    const migrationPath = `../../drizzle-sqlite/${entry.tag}.sql`;
+    const sqlText = sqliteMigrationModules[migrationPath];
+
+    if (!sqlText) {
+      throw new Error(`Missing migration SQL file: ${migrationPath}`);
+    }
+
+    return {
+      hash: entry.tag,
+      statements: splitMigrationStatements(sqlText),
+    };
+  });
+}
+
+function isIgnorableSqliteMigrationError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    message.includes("already exists") ||
+    message.includes("duplicate column name")
+  );
 }
 
 export async function migratePgliteDatabase(
@@ -63,4 +99,55 @@ export async function migratePgliteDatabase(
     migrationsTable: MIGRATIONS_TABLE,
     migrationsSchema: MIGRATIONS_SCHEMA,
   });
+}
+
+async function ensureSqliteMigrationsTable(path: string) {
+  await executeSqlite(
+    path,
+    `CREATE TABLE IF NOT EXISTS ${SQLITE_MIGRATIONS_TABLE} (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      hash TEXT NOT NULL UNIQUE,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );`,
+    [],
+  );
+}
+
+async function getAppliedSqliteMigrationHashes(path: string) {
+  const result = await executeSqlite(
+    path,
+    `SELECT hash FROM ${SQLITE_MIGRATIONS_TABLE};`,
+    [],
+  );
+
+  return new Set((result?.rows || []).map((row) => String(row.hash)));
+}
+
+export async function migrateTauriSqliteDatabase(path: string) {
+  await ensureSqliteMigrationsTable(path);
+
+  const appliedHashes = await getAppliedSqliteMigrationHashes(path);
+  const migrations = getSqliteMigrations();
+
+  for (const migration of migrations) {
+    if (appliedHashes.has(migration.hash)) {
+      continue;
+    }
+
+    for (const statement of migration.statements) {
+      try {
+        await executeSqlite(path, statement, []);
+      } catch (error) {
+        if (!isIgnorableSqliteMigrationError(error)) {
+          throw error;
+        }
+      }
+    }
+
+    await executeSqlite(
+      path,
+      `INSERT INTO ${SQLITE_MIGRATIONS_TABLE} (hash) VALUES (?);`,
+      [migration.hash],
+    );
+  }
 }

@@ -1,6 +1,5 @@
-import * as schema from "@/db/schema";
+import type { DrizzleAppDatabase } from "@/db";
 import { Repository } from "@/types";
-import type { PgliteDatabase } from "drizzle-orm/pglite";
 import type { Application, NewApplicationRow } from "../types";
 
 export class ApplicationRepository implements Repository<
@@ -9,26 +8,26 @@ export class ApplicationRepository implements Repository<
   Partial<NewApplicationRow>,
   string
 > {
-  constructor(private readonly db: PgliteDatabase<typeof schema>) {}
+  constructor(private readonly db: DrizzleAppDatabase) {}
 
-  get(id: string): Promise<Application | null> {
+  get(_id: string): Promise<Application | null> {
     throw new Error("Method not implemented.");
   }
 
-  create(data: NewApplicationRow): Promise<Application> {
+  create(_data: NewApplicationRow): Promise<Application> {
     throw new Error("Method not implemented.");
   }
 
-  update(id: string, data: Partial<NewApplicationRow>): Promise<Application> {
+  update(_id: string, _data: Partial<NewApplicationRow>): Promise<Application> {
     throw new Error("Method not implemented.");
   }
 
-  delete(id: string): Promise<void> {
+  delete(_id: string): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
   public async list(): Promise<Application[]> {
-    const rows = await this.db.query.applications.findMany({
+    const applicationRows = await this.db.query.applications.findMany({
       with: {
         company: true,
         applicationContacts: {
@@ -44,13 +43,21 @@ export class ApplicationRepository implements Repository<
       },
     });
 
-    return rows.map((row) => ({
+    return applicationRows.map((row) => ({
       ...row,
       attendanceType: row.attendanceType as Application["attendanceType"],
       employmentType: row.employmentType as Application["employmentType"],
       company: row.company,
-      contacts: row.applicationContacts.map((relation) => relation.contact),
-      documents: row.applicationDocuments.map((relation) => relation.document),
+      contacts: row.applicationContacts
+        .map((relation) => relation.contact)
+        .filter((contact): contact is NonNullable<typeof contact> =>
+          Boolean(contact),
+        ),
+      documents: row.applicationDocuments
+        .map((relation) => relation.document)
+        .filter((document): document is NonNullable<typeof document> =>
+          Boolean(document),
+        ),
     }));
   }
 }

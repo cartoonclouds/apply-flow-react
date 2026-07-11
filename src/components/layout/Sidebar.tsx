@@ -26,7 +26,7 @@ function Sidebar() {
               activeProps={{ className: "bg-gray-200 font-medium" }}
               className="flex items-center gap-2 p-2 rounded hover:bg-gray-200 cursor-pointer"
             >
-              <item.icon className="w-5 h-5" />
+              <item.icon className="w-5 h-5 flex-shrink-0" />
               <span>{item.label}</span>
             </Link>
           </li>

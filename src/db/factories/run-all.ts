@@ -2,14 +2,15 @@ import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 
 import { migratePgliteDatabase } from "../migrate";
+import { deleteIndexedDbDatabase, getDatabaseName } from "../runtime";
 
 import {
-  applicationContacts,
-  applicationDocuments,
-  applications,
-  companies,
-  contacts,
-  documents,
+    applicationContacts,
+    applicationDocuments,
+    applications,
+    companies,
+    contacts,
+    documents,
 } from "../schema/index.js";
 
 import { seedApplications } from "./application.factory";
@@ -24,13 +25,11 @@ function resolveParameters() {
       env?: {
         VITE_FACTORY_COUNT?: string;
         VITE_REFRESH_DATABASE?: string;
-        VITE_DATABASE_NAME?: string;
       };
     }
   ).env;
 
-  const { VITE_FACTORY_COUNT, VITE_REFRESH_DATABASE, VITE_DATABASE_NAME } =
-    env ?? {};
+  const { VITE_FACTORY_COUNT, VITE_REFRESH_DATABASE } = env ?? {};
 
   console.log(VITE_FACTORY_COUNT, VITE_REFRESH_DATABASE);
 
@@ -44,7 +43,7 @@ function resolveParameters() {
   return {
     count: rawFactoryCount,
     refreshDatabase: rawRefreshDatabase,
-    databaseName: VITE_DATABASE_NAME ?? "jaa-react",
+    databaseName: getDatabaseName(),
   };
 }
 
@@ -78,20 +77,6 @@ function createFactoryClient(isBrowser: boolean) {
   return isBrowser
     ? new PGlite(`idb://${databaseName}`)
     : new PGlite("./.pglite-seed");
-}
-
-function deleteBrowserDatabase(name: string): Promise<void> {
-  if (typeof indexedDB === "undefined") {
-    return Promise.resolve();
-  }
-
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.deleteDatabase(name);
-    request.onerror = () =>
-      reject(request.error ?? new Error(`Failed to delete database ${name}`));
-    request.onblocked = () => resolve();
-    request.onsuccess = () => resolve();
-  });
 }
 
 async function seedFactories(client: PGlite, count: number) {
@@ -128,7 +113,7 @@ export async function runAllFactories() {
 
   if (refreshDatabase) {
     console.log("Refreshing database and migrations as requested.");
-    await deleteBrowserDatabase(databaseName);
+    await deleteIndexedDbDatabase(databaseName);
     client = createFactoryClient(isBrowser);
   }
 
@@ -140,7 +125,7 @@ export async function runAllFactories() {
     }
 
     console.warn("Browser seed failed, rebuilding the database once.", error);
-    await deleteBrowserDatabase(databaseName);
+    await deleteIndexedDbDatabase(databaseName);
     client = createFactoryClient(isBrowser);
     await seedFactories(client, count);
   }

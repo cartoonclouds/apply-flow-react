@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import type { DayButtonProps } from "react-day-picker";
 
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,7 +15,7 @@ export function ApplicationCalendar() {
   );
 
   useEffect(() => {
-    const applicationRepository = new ApplicationRepository(db as any);
+    const applicationRepository = new ApplicationRepository(db);
 
     void applicationRepository
       .list()
@@ -22,9 +23,7 @@ export function ApplicationCalendar() {
         setApplicationsData(data);
         // setError(null);
       })
-      .catch((caught) => {
-        const message =
-          caught instanceof Error ? caught.message : "Failed to load data";
+      .catch(() => {
         // setError(message);
       });
     // .finally(() => {
@@ -51,7 +50,12 @@ export function ApplicationCalendar() {
             },
           }}
           components={{
-            DayButton: ({ children, modifiers, day, ...props }) => {
+            DayButton: ({
+              children,
+              modifiers,
+              day,
+              ...props
+            }: DayButtonProps) => {
               const dateApplications = applicationsData.filter((app) => {
                 return app.createdAt?.day === day.date.getDate();
               });

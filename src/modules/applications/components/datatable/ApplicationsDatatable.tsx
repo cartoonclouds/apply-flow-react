@@ -11,7 +11,7 @@ function ApplicationsDatatable() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const applicationRepository = new ApplicationRepository(db as any);
+    const applicationRepository = new ApplicationRepository(db);
 
     void applicationRepository
       .list()

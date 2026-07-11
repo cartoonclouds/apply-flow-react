@@ -4,6 +4,16 @@ description = "Allows reading metadata from a local SQLite database path via the
 commands.allow = ["read_sqlite_database"]
 
 [[permission]]
+identifier = "allow-execute-sqlite-query"
+description = "Allows executing parameterized SQLite queries against a local SQLite database path via the execute_sqlite_query command."
+commands.allow = ["execute_sqlite_query"]
+
+[[permission]]
 identifier = "deny-read-sqlite-database"
 description = "Denies reading metadata from a local SQLite database path via the read_sqlite_database command."
 commands.deny = ["read_sqlite_database"]
+
+[[permission]]
+identifier = "deny-execute-sqlite-query"
+description = "Denies executing parameterized SQLite queries against a local SQLite database path via the execute_sqlite_query command."
+commands.deny = ["execute_sqlite_query"]
