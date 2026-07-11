@@ -23,6 +23,7 @@ function ApplicationsDatatable() {
         const message =
           caught instanceof Error ? caught.message : "Failed to load data";
         setError(message);
+        console.error(caught);
       })
       .finally(() => {
         setLoading(false);
