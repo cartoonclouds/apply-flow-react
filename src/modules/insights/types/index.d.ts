@@ -48,6 +48,11 @@ export interface InsightViewDefinition {
  * Represents an executable insight class that will calculate a specific insight when executed.
  */
 export interface IInsight {
+  // /**
+  //  * The database instance that will be used to execute the insight. This is typically an instance of a database connection or ORM that allows the insight to query and manipulate data as needed.
+  //  */
+  //  constructor(private readonly db: DrizzleAppDatabase);
+
   /**
    * Execute the logic to calculate the insight. The result will be used for rendering and may also be persisted depending on the repository implementation.
    * @returns The calculated insight value.

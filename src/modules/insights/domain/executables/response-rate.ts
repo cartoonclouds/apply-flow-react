@@ -1,7 +1,10 @@
 import { Activity, TrendingDown } from "lucide-react";
 import { IInsight, InsightViewDefinition } from "../../types";
+import { DrizzleAppDatabase } from "@/db";
 
 export class ResponseRate implements IInsight {
+  constructor(private readonly db: DrizzleAppDatabase) {}
+
   public execute(): Promise<number> {
     return Promise.resolve(85);
   }

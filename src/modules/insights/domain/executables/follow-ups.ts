@@ -1,7 +1,10 @@
+import { DrizzleAppDatabase } from "@/db";
 import { MessageSquare, TrendingUp } from "lucide-react";
 import { IInsight, InsightViewDefinition } from "../../types";
 
 export class FollowUps implements IInsight {
+  constructor(private readonly db: DrizzleAppDatabase) {}
+
   public execute(): Promise<number> {
     return Promise.resolve(5);
   }

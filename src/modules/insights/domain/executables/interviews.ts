@@ -1,7 +1,10 @@
+import { DrizzleAppDatabase } from "@/db";
 import { Waves } from "lucide-react";
 import { IInsight, InsightViewDefinition } from "../../types";
 
 export class Interviews implements IInsight {
+  constructor(private readonly db: DrizzleAppDatabase) {}
+
   public execute(): Promise<number> {
     return Promise.resolve(12);
   }

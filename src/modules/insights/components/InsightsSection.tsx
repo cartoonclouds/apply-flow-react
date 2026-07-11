@@ -1,13 +1,14 @@
 import { ItemGroup } from "@/components/ui/item";
 import InsightCard from "@/modules/insights/components/InsightCard";
 
+import { db } from "@/db";
 import React from "react";
 import { INSIGHTS } from "../domain/executables";
 import { InsightViewDefinition } from "../types";
 
 function InsightsSection() {
   const insights: InsightViewDefinition[] = INSIGHTS.map((insight) =>
-    new insight().toView(),
+    new insight(db).toView(),
   );
 
   return (
