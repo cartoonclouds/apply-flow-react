@@ -1,4 +1,6 @@
-import { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+export type InsightDirection = "up" | "down" | "neutral";
 
 export interface InsightViewSubValueDefinition {
   /**
@@ -8,7 +10,7 @@ export interface InsightViewSubValueDefinition {
   /**
    * The direction of the subvalue, indicating whether it represents an increase, decrease, or neutral change compared to a previous value. This can be used to visually indicate trends or changes in the data.
    */
-  direction: "up" | "down" | "neutral";
+  direction: InsightDirection;
   /**
    * The icon associated with the subvalue, which can be used to visually represent the trend or change indicated by the direction. This is typically a string that corresponds to an icon name or identifier in the UI framework being used.
    */
@@ -31,11 +33,11 @@ export interface InsightViewDefinition {
   /**
    * The subvalue of the insight card, providing additional context or information about the main value. This is optional and can be used to display trends, comparisons, or other relevant data.
    * */
-  subvalue?: InsightViewSubValueDefinition;
+  subValue?: InsightViewSubValueDefinition;
   /**
    * The icon associated with the insight card, which can be used to visually represent the insight in the UI. This is typically a string that corresponds to an icon name or identifier in the UI framework being used.
    */
-  icon?: LucideIcon;
+  icon: LucideIcon;
   /**
    * The color associated with the insight card, which can be used to visually represent the insight in the UI. This is typically a string that corresponds to a color name or identifier in the UI framework being used.
    */

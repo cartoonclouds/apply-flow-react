@@ -12,7 +12,7 @@ export class ResponseRate implements IInsight {
       description:
         "The percentage of applications that have received a response.",
       value: 85,
-      subvalue: {
+      subValue: {
         text: "-5% since last month",
         direction: "down",
         icon: TrendingDown, // Replace with the actual icon component or identifier

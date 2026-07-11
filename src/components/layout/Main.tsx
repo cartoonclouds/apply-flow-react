@@ -1,7 +1,11 @@
 import React from "react";
 
 function Main({ children }: { children: React.ReactNode }) {
-  return <main className="flex flex-col flex-1 p-4 gap-6">{children}</main>;
+  return (
+    <main className="flex flex-col flex-1 p-4 gap-6 @container/main">
+      {children}
+    </main>
+  );
 }
 
 export default Main;

@@ -17,7 +17,7 @@ function renderBootstrapError(error: unknown) {
 
   createRoot(rootElement).render(
     <StrictMode>
-      <main className="min-h-screen bg-red-50 text-red-900 p-6 flex items-center justify-center">
+      <main className="min-h-screen bg-red-50 text-red-900 p-6 flex items-center justify-center @container/main">
         <section className="max-w-xl w-full rounded-lg border border-red-200 bg-white p-5 shadow-sm">
           <h1 className="text-xl font-semibold mb-2">
             Database startup failed

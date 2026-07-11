@@ -11,7 +11,7 @@ export class FollowUps implements IInsight {
       title: "Follow-Ups",
       description: "The number of follow-ups that are currently pending.",
       value: 5,
-      subvalue: {
+      subValue: {
         text: "<b>+2</b> since last week",
         direction: "up",
         icon: TrendingUp, // Replace with the actual icon component or identifier

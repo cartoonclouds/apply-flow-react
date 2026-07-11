@@ -1,33 +1,34 @@
 import {
-    Item,
-    ItemContent,
-    ItemDescription,
-    ItemMedia,
-    ItemTitle,
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
 } from "@/components/ui/item";
 import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { type LucideIcon } from "lucide-react";
 import React from "react";
+import { InsightDirection } from "../types";
 
 interface InsightSubValue {
   text: string;
-  direction: "up" | "down";
+  direction: InsightDirection;
   icon: LucideIcon;
 }
 
 interface InsightCardProps {
   title: string;
-  value: number;
+  value: number | string;
   subValue?: InsightSubValue;
   icon: LucideIcon;
-  color: string;
+  color?: string;
 }
 
-function insightIconStyles(color: string) {
+function insightIconStyles(color?: string) {
   switch (color) {
     case "blue":
       return "bg-blue-100 text-blue-500";
@@ -88,7 +89,9 @@ function InsightCard({
             <span className={subValueColor}>
               <Tooltip>
                 <TooltipTrigger>{subValue.text}</TooltipTrigger>
-                <TooltipContent className={undefined}>{subValue.text}</TooltipContent>
+                <TooltipContent className={undefined}>
+                  {subValue.text}
+                </TooltipContent>
               </Tooltip>
             </span>
           </ItemDescription>

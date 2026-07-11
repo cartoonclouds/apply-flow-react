@@ -10,7 +10,7 @@ function Header() {
   const { user } = useUser();
 
   return (
-    <header className="flex flex-col gap-8 lg:flex-row p-4 border-b justify-between border-gray-200">
+    <header className="flex flex-col gap-8 lg:flex-row p-4 border-b justify-between border-gray-200 @container/header">
       <div className="flex flex-col">
         <h1 className="text-lg font-semibold text-gray-800">
           {greeting(user?.first_name ?? "Job Hunter")}

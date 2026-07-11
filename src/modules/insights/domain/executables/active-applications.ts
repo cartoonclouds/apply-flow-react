@@ -11,7 +11,7 @@ export class ActiveApplications implements IInsight {
       title: "Active Applications",
       description: "The number of applications that are currently active.",
       value: 28,
-      subvalue: {
+      subValue: {
         text: "<b>+6</b> since last week",
         direction: "up",
         icon: TrendingUp, // Replace with the actual icon component or identifier

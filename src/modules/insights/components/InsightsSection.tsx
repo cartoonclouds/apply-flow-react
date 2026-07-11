@@ -17,7 +17,7 @@ function InsightsSection() {
           key={index}
           title={insight.title}
           value={insight.value}
-          subvalue={insight.subvalue}
+          subValue={insight.subValue}
           icon={insight.icon} // Replace with the actual icon component
           color={insight.color}
         />
