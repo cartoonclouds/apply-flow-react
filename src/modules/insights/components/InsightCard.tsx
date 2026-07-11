@@ -63,7 +63,7 @@ function InsightCard({
 
   return (
     <Item
-      render={<section />}
+      render={<article />}
       variant="outline"
       className="h-full p-4 gap-4 items-start rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300"
     >
@@ -73,7 +73,7 @@ function InsightCard({
         <Icon size={26} color={color} />
       </ItemMedia>
 
-      <ItemContent className="grid h-full">
+      <ItemContent className="grid h-full justify-between">
         <ItemTitle className="text-sm text-muted-foreground">{title}</ItemTitle>
 
         <ItemDescription className="text-2xl font-medium text-foreground">

@@ -2,17 +2,38 @@ import { ItemGroup } from "@/components/ui/item";
 import InsightCard from "@/modules/insights/components/InsightCard";
 
 import { db } from "@/db";
-import React from "react";
+import * as React from "react";
+import { useEffect, useState } from "react";
 import { INSIGHTS } from "../domain/executables";
 import { InsightViewDefinition } from "../types";
 
 function InsightsSection() {
-  const insights: InsightViewDefinition[] = INSIGHTS.map((insight) =>
-    new insight(db).toView(),
-  );
+  const [insights, setInsights] = useState<InsightViewDefinition[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    void (async () => {
+      const nextInsights = await Promise.all(
+        INSIGHTS.map(async (InsightConstructor) => {
+          const insight = new InsightConstructor(db);
+          await insight.execute();
+          return insight.toView();
+        }),
+      );
+
+      if (isMounted) {
+        setInsights(nextInsights);
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
-    <ItemGroup className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <ItemGroup className="grid grid-cols-1 gap-4 @md/main:grid-cols-2 @lg/main:grid-cols-3 @xl/main:grid-cols-4">
       {insights.map((insight, index) => (
         <InsightCard
           key={index}
