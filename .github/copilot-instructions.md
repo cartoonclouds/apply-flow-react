@@ -42,6 +42,12 @@ React.useEffect(() => {
 - Do not create type-only files as `*.ts`.
 - When migrating existing type-only files from `*.ts`, rename them to matching `*.d.ts` names.
 
+## Drizzle Migrations
+
+- Name every new Drizzle migration folder with a datetime stamp prefix in the form `YYYYMMDDHHMMSS_description`.
+- Keep the generated `migration.sql` and `snapshot.json` files inside that timestamped folder.
+- Do not rename applied migration folders unless you are intentionally resetting or rewriting migration history.
+
 ## TanStack Router Import Style
 
 - Prefer named imports from `@tanstack/react-router`.
