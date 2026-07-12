@@ -18,6 +18,14 @@ type BrowserMigratableDatabase = {
 const MIGRATIONS_FOLDER = "./drizzle";
 const MIGRATIONS_TABLE = "__drizzle_migrations";
 const MIGRATIONS_SCHEMA = "drizzle";
+const SQLITE_RELATION_COMPATIBILITY_VIEWS = [
+  ["companies_contacts", "contacts"],
+  ["companies_applications", "applications"],
+  ["contacts_applications", "application_contacts"],
+  ["applications_contacts", "application_contacts"],
+  ["applications_documents", "application_documents"],
+  ["documents_application", "application_documents"],
+] as const;
 
 const browserMigrationModules = import.meta.glob("../../drizzle/*.sql", {
   query: "?raw",
@@ -124,6 +132,16 @@ async function getAppliedSqliteMigrationHashes(path: string) {
   return new Set((result?.rows || []).map((row) => String(row.hash)));
 }
 
+async function ensureSqliteRelationCompatibilityViews(path: string) {
+  for (const [viewName, tableName] of SQLITE_RELATION_COMPATIBILITY_VIEWS) {
+    await executeSqlite(
+      path,
+      `CREATE VIEW IF NOT EXISTS "${viewName}" AS SELECT * FROM "${tableName}";`,
+      [],
+    );
+  }
+}
+
 export async function migrateTauriSqliteDatabase(path: string) {
   await ensureSqliteMigrationsTable(path);
 
@@ -151,4 +169,6 @@ export async function migrateTauriSqliteDatabase(path: string) {
       [migration.hash],
     );
   }
+
+  await ensureSqliteRelationCompatibilityViews(path);
 }
