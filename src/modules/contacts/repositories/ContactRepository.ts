@@ -1,5 +1,6 @@
 import type { DrizzleAppDatabase } from "@/db";
 import * as schema from "@/db/schema";
+import { mapDefined, mapToId, pluck } from "@/lib/map-defined";
 import { Repository } from "@/types";
 import { inArray } from "drizzle-orm";
 import type { Contact, NewContactRow } from "../types";
@@ -35,10 +36,8 @@ export class ContactRepository implements Repository<
       return [];
     }
 
-    const companyIds = contactRows
-      .map((row) => row.companyId)
-      .filter((id): id is string => Boolean(id));
-    const contactIds = contactRows.map((row) => row.id);
+    const companyIds = mapDefined(contactRows, (row) => row.companyId);
+    const contactIds = pluck(contactRows, "id");
 
     const [companyRows, applicationContactRows] = await Promise.all([
       companyIds.length
@@ -51,19 +50,15 @@ export class ContactRepository implements Repository<
       }),
     ]);
 
-    const applicationIds = applicationContactRows.map(
-      (row) => row.applicationId,
-    );
+    const applicationIds = pluck(applicationContactRows, "applicationId");
     const applicationRows = applicationIds.length
       ? await this.db.query.applications.findMany({
           where: inArray(schema.applications.id, applicationIds),
         })
       : [];
 
-    const companiesById = new Map(companyRows.map((row) => [row.id, row]));
-    const applicationsById = new Map(
-      applicationRows.map((row) => [row.id, row]),
-    );
+    const companiesById = mapToId(companyRows);
+    const applicationsById = mapToId(applicationRows);
 
     const applicationsByContactId = new Map<string, Contact["applications"]>();
     for (const relation of applicationContactRows) {

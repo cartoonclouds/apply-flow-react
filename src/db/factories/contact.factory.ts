@@ -1,3 +1,4 @@
+import { pluck } from "@/lib/map-defined";
 import { seed } from "drizzle-seed";
 
 export async function seedContacts(db: unknown, schema: unknown, count = 10) {
@@ -19,7 +20,7 @@ export async function seedContacts(db: unknown, schema: unknown, count = 10) {
   const companyRows = await (db as any)
     .select({ id: companies.id })
     .from(companies);
-  const companyIds = companyRows.map((row: { id: string }) => row.id);
+  const companyIds = pluck(companyRows as Array<{ id: string }>, "id");
 
   if (companyIds.length === 0) {
     throw new Error("seedContacts requires at least one seeded company");

@@ -1,4 +1,5 @@
 import { DrizzleAppDatabase } from "@/db";
+import { pluck } from "@/lib/map-defined";
 import { MessageSquare, Minus } from "lucide-react";
 import { IInsight, InsightViewDefinition } from "../../types";
 
@@ -27,9 +28,7 @@ export class FollowUps implements IInsight {
       this.db.query.applicationContacts.findMany(),
     ]);
 
-    const respondedIds = new Set(
-      contacts.map((relation) => relation.applicationId),
-    );
+    const respondedIds = new Set(pluck(contacts, "applicationId"));
     const followUpThreshold = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
     this.value = applications.filter((application) => {

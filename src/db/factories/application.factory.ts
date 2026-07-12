@@ -1,3 +1,4 @@
+import { pluck } from "@/lib/map-defined";
 import { seed } from "drizzle-seed";
 
 import {
@@ -32,7 +33,7 @@ export async function seedApplications(
   const companyRows = await (db as any)
     .select({ id: companies.id })
     .from(companies);
-  const companyIds = companyRows.map((row: { id: string }) => row.id);
+  const companyIds = pluck(companyRows as Array<{ id: string }>, "id");
 
   if (companyIds.length === 0) {
     throw new Error("seedApplications requires at least one seeded company");

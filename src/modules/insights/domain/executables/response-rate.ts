@@ -1,4 +1,5 @@
 import { DrizzleAppDatabase } from "@/db";
+import { pluck } from "@/lib/map-defined";
 import { Activity, Minus } from "lucide-react";
 import { IInsight, InsightViewDefinition } from "../../types";
 
@@ -24,9 +25,7 @@ export class ResponseRate implements IInsight {
       return this.value;
     }
 
-    const activeIds = new Set(
-      activeApplications.map((application) => application.id),
-    );
+    const activeIds = new Set(pluck(activeApplications, "id"));
     const respondedIds = new Set<string>();
 
     for (const relation of contacts) {

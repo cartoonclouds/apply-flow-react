@@ -1,21 +1,22 @@
 import {
-    ColumnDef,
-    SortingState,
-    flexRender,
-    getCoreRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
-    useReactTable,
+  ColumnDef,
+  SortingState,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
 
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import React from "react";
 import { Button } from "../button";
 
@@ -35,12 +36,14 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   settings?: DataTableSettings;
+  onRowClick?: (row: TData) => void;
 }
 
 function Datatable<TData, TValue>({
   columns,
   data,
   settings = defaultSettings,
+  onRowClick,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
@@ -90,9 +93,12 @@ function Datatable<TData, TValue>({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
-                  className={undefined}
+                  className={cn(
+                    onRowClick ? "cursor-pointer hover:bg-muted/50" : undefined,
+                  )}
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={() => onRowClick?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell className={undefined} key={cell.id}>

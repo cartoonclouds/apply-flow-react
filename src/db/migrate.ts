@@ -1,3 +1,4 @@
+import { mapDefined } from "@/lib/map-defined";
 import type { PgliteDatabase } from "drizzle-orm/pglite";
 import sqliteJournal from "../../drizzle-sqlite/meta/_journal.json";
 import journal from "../../drizzle/meta/_journal.json";
@@ -31,10 +32,10 @@ const sqliteMigrationModules = import.meta.glob("../../drizzle-sqlite/*.sql", {
 }) as Record<string, string>;
 
 function splitMigrationStatements(sqlText: string): string[] {
-  return sqlText
-    .split("--> statement-breakpoint")
-    .map((statement) => statement.trim())
-    .filter((statement) => statement.length > 0);
+  return mapDefined(sqlText.split("--> statement-breakpoint"), (statement) => {
+    const trimmed = statement.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  });
 }
 
 function getBrowserMigrations() {

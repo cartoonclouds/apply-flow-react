@@ -1,5 +1,8 @@
 import type { DrizzleAppDatabase } from "@/db";
+import * as schema from "@/db/schema";
+import { mapDefined } from "@/lib/map-defined";
 import { Repository } from "@/types";
+import { eq } from "drizzle-orm";
 import type { Application, NewApplicationRow } from "../types";
 
 export class ApplicationRepository implements Repository<
@@ -10,20 +13,90 @@ export class ApplicationRepository implements Repository<
 > {
   constructor(private readonly db: DrizzleAppDatabase) {}
 
-  get(_id: string): Promise<Application | null> {
-    throw new Error("Method not implemented.");
+  public async get(id: string): Promise<Application | null> {
+    const row = await this.db.query.applications.findFirst({
+      where: eq(schema.applications.id, id),
+      with: {
+        company: true,
+        contacts: {
+          with: {
+            contact: true,
+          },
+        },
+        documents: {
+          with: {
+            document: true,
+          },
+        },
+      },
+    });
+
+    if (!row) {
+      return null;
+    }
+
+    return {
+      ...row,
+      attendanceType: row.attendanceType as Application["attendanceType"],
+      employmentType: row.employmentType as Application["employmentType"],
+      company: row.company,
+      contacts: mapDefined(row.contacts, (relation) => relation.contact),
+      documents: mapDefined(row.documents, (relation) => relation.document),
+    };
   }
 
-  create(_data: NewApplicationRow): Promise<Application> {
-    throw new Error("Method not implemented.");
+  public async create(data: NewApplicationRow): Promise<Application> {
+    const id = data.id || crypto.randomUUID();
+
+    await (this.db as any).insert(schema.applications).values({
+      ...data,
+      id,
+      title: data.title || "Untitled Application",
+      priority: data.priority ?? 3,
+      isArchived: data.isArchived ?? false,
+    });
+
+    const created = await this.get(id);
+
+    if (!created) {
+      throw new Error("Failed to create application");
+    }
+
+    return created;
   }
 
-  update(_id: string, _data: Partial<NewApplicationRow>): Promise<Application> {
-    throw new Error("Method not implemented.");
+  public async update(
+    id: string,
+    data: Partial<NewApplicationRow>,
+  ): Promise<Application> {
+    const updatePayload: Record<string, unknown> = {
+      updatedAt: new Date().toISOString(),
+    };
+
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== undefined) {
+        updatePayload[key] = value;
+      }
+    }
+
+    await (this.db as any)
+      .update(schema.applications)
+      .set(updatePayload)
+      .where(eq(schema.applications.id, id));
+
+    const updated = await this.get(id);
+
+    if (!updated) {
+      throw new Error("Failed to update application");
+    }
+
+    return updated;
   }
 
-  delete(_id: string): Promise<void> {
-    throw new Error("Method not implemented.");
+  public async delete(id: string): Promise<void> {
+    await (this.db as any)
+      .delete(schema.applications)
+      .where(eq(schema.applications.id, id));
   }
 
   public async list(): Promise<Application[]> {
@@ -48,16 +121,8 @@ export class ApplicationRepository implements Repository<
       attendanceType: row.attendanceType as Application["attendanceType"],
       employmentType: row.employmentType as Application["employmentType"],
       company: row.company,
-      contacts: row.contacts
-        .map((relation) => relation.contact)
-        .filter((contact): contact is NonNullable<typeof contact> =>
-          Boolean(contact),
-        ),
-      documents: row.documents
-        .map((relation) => relation.document)
-        .filter((document): document is NonNullable<typeof document> =>
-          Boolean(document),
-        ),
+      contacts: mapDefined(row.contacts, (relation) => relation.contact),
+      documents: mapDefined(row.documents, (relation) => relation.document),
     }));
   }
 }

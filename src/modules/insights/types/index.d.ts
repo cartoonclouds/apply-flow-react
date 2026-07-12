@@ -41,7 +41,17 @@ export interface InsightViewDefinition {
   /**
    * The color associated with the insight card, which can be used to visually represent the insight in the UI. This is typically a string that corresponds to a color name or identifier in the UI framework being used.
    */
-  color?: string;
+  color?:
+    | "blue"
+    | "green"
+    | "orange"
+    | "red"
+    | "purple"
+    | "teal"
+    | "yellow"
+    | "slate"
+    | "emerald"
+    | "violet";
 }
 
 /**

@@ -1,5 +1,6 @@
 import type { DrizzleAppDatabase } from "@/db";
 import * as schema from "@/db/schema";
+import { pluck } from "@/lib/map-defined";
 import { Repository } from "@/types";
 import { inArray } from "drizzle-orm";
 import type { Company, NewCompanyRow } from "../types";
@@ -35,7 +36,7 @@ export class CompanyRepository implements Repository<
       return [];
     }
 
-    const companyIds = companyRows.map((row) => row.id);
+    const companyIds = pluck(companyRows, "id");
     const [contactRows, applicationRows] = await Promise.all([
       this.db.query.contacts.findMany({
         where: inArray(schema.contacts.companyId, companyIds),

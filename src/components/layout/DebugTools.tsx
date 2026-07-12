@@ -66,7 +66,7 @@ function DebugTools() {
 
   return (
     <DraggableContainer
-      className="w-[min(24rem,calc(100vw-2rem))] rounded-2xl border-2 border-amber-400 bg-linear-to-br from-amber-50 via-white to-orange-50 p-4 text-slate-900 shadow-[0_18px_50px_rgba(245,158,11,0.25)] ring-1 ring-amber-200 backdrop-blur-sm"
+      className="opacity-60 hover:opacity-100 w-[min(24rem,calc(100vw-2rem))] rounded-2xl border-2 border-amber-400 bg-linear-to-br from-amber-50 via-white to-orange-50 p-4 text-slate-900 shadow-[0_18px_50px_rgba(245,158,11,0.25)] ring-1 ring-amber-200 backdrop-blur-sm"
       handleClassName="mb-3 flex items-start justify-between gap-3"
       initialPosition={{ x: 16, y: 16 }}
       viewportPadding={8}
