@@ -19,18 +19,24 @@ function Sidebar() {
       <Separator className={undefined} />
 
       <ul className="flex flex-col gap-2">
-        {sidebarItems.map((item) => (
-          <li key={item.id}>
-            <Link
-              to={item.route}
-              activeProps={{ className: "bg-gray-200 font-medium" }}
-              className="flex items-center gap-2 p-2 rounded hover:bg-gray-200 cursor-pointer"
-            >
-              <item.icon className="w-5 h-5 shrink-0" />
-              <span>{item.label}</span>
-            </Link>
-          </li>
-        ))}
+        {sidebarItems.map((item) =>
+          item === "MenuButtonSeparator" ? (
+            <li key={item}>
+              <Separator className={undefined} />
+            </li>
+          ) : (
+            <li key={item.id}>
+              <Link
+                to={item.route}
+                activeProps={{ className: "bg-gray-200 font-medium" }}
+                className="flex items-center gap-2 p-2 rounded hover:bg-gray-200 cursor-pointer"
+              >
+                <item.icon className="w-5 h-5 shrink-0" />
+                <span>{item.label}</span>
+              </Link>
+            </li>
+          ),
+        )}
       </ul>
     </aside>
   );

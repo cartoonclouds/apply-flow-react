@@ -1,4 +1,4 @@
-# JAA React
+# ApplyFlow
 
 A modern React + Vite application with Drizzle ORM + PGlite, state management, and shadcn/ui components.
 
@@ -34,21 +34,6 @@ npm run tauri:build
 
 # Lint code
 npm run lint
-```
-
-## Database Backend Selection
-
-The app can run Drizzle with either browser IndexedDB storage or a Tauri SQLite file, controlled by env variables.
-
-- `VITE_DB_DRIVER=indexeddb` (default): Uses PGlite persisted to IndexedDB (`idb://...`).
-- `VITE_DB_DRIVER=tauri-sqlite`: Uses Drizzle SQLite proxy over a Tauri command that executes parameterized queries against a local SQLite file.
-- `VITE_TAURI_SQLITE_PATH`: Absolute path to the SQLite file when `VITE_DB_DRIVER=tauri-sqlite`.
-
-Example:
-
-```bash
-VITE_DB_DRIVER=tauri-sqlite
-VITE_TAURI_SQLITE_PATH=C:/Users/you/Documents/applyflow.db
 ```
 
 ## Dependencies

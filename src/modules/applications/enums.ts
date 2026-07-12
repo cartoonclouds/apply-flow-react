@@ -1,13 +1,18 @@
-export enum ApplicationAttendanceType {
-  Remote = "remote",
-  Hybrid = "hybrid",
-  OnSite = "on-site",
-}
+import {
+    APPLICATION_ATTENDANCE_TYPE_VALUES,
+    APPLICATION_EMPLOYMENT_TYPE_VALUES,
+} from "@/constants/enum-values";
 
-export enum ApplicationEmploymentType {
-  PartTime = "part-time",
-  Contract = "contract",
-  Internship = "internship",
-  FullTime = "full-time",
-  Volunteer = "volunteer",
-}
+export const ApplicationAttendanceType = {
+  Remote: APPLICATION_ATTENDANCE_TYPE_VALUES[0],
+  Hybrid: APPLICATION_ATTENDANCE_TYPE_VALUES[1],
+  OnSite: APPLICATION_ATTENDANCE_TYPE_VALUES[2],
+} as const;
+
+export const ApplicationEmploymentType = {
+  PartTime: APPLICATION_EMPLOYMENT_TYPE_VALUES[0],
+  Contract: APPLICATION_EMPLOYMENT_TYPE_VALUES[1],
+  Internship: APPLICATION_EMPLOYMENT_TYPE_VALUES[2],
+  FullTime: APPLICATION_EMPLOYMENT_TYPE_VALUES[3],
+  Volunteer: APPLICATION_EMPLOYMENT_TYPE_VALUES[4],
+} as const;

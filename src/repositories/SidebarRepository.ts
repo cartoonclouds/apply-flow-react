@@ -8,6 +8,8 @@ import {
   Users,
 } from "lucide-react";
 
+export const MENU_SEPARATOR = "MenuButtonSeparator" as const;
+
 export class SidebarRepository {
   constructor(private readonly _db: DrizzleAppDatabase) {}
 
@@ -27,21 +29,22 @@ export class SidebarRepository {
       },
       {
         id: 3,
-        label: "Calendar",
-        icon: CalendarIcon,
-        route: "/calendar",
-      },
-      {
-        id: 4,
         label: "Companies",
         icon: Building2,
         route: "/companies",
       },
       {
-        id: 5,
+        id: 4,
         label: "Contacts",
         icon: Users,
         route: "/contacts",
+      },
+      MENU_SEPARATOR,
+      {
+        id: 5,
+        label: "Calendar",
+        icon: CalendarIcon,
+        route: "/calendar",
       },
     ];
   }

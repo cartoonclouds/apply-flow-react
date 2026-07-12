@@ -2,6 +2,9 @@
 
 ## Import Style
 
+- For every React component file, always include `import React from "react";`.
+- When creating a new component, add `import React from "react";` at the top.
+- When editing an existing component, ensure `import React from "react";` is present.
 - Prefer direct named imports over namespace access for React and other libraries.
 - Do not use namespaced member calls like `React.useState`, `React.useEffect`, or `React.useMemo`.
 - Use named imports and direct calls instead.
@@ -9,7 +12,7 @@
 ### Preferred
 
 ```tsx
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 const [value, setValue] = useState(0);
 useEffect(() => {

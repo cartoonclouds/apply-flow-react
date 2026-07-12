@@ -18,7 +18,9 @@ struct SqliteMetadata {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct SqliteQueryResult {
+    columns: Vec<String>,
     rows: Vec<JsonValue>,
+    values: Vec<Vec<JsonValue>>,
     rows_affected: usize,
     last_insert_rowid: i64,
 }
@@ -145,6 +147,17 @@ fn ensure_sqlite_parent_exists(path: &PathBuf) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn delete_sqlite_database(path: String) -> Result<(), String> {
+    let resolved = resolve_sqlite_path(&path)?;
+
+    match std::fs::remove_file(&resolved) {
+        Ok(()) => Ok(()),
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(err) => Err(format!("Unable to delete SQLite database: {err}")),
+    }
+}
+
+#[tauri::command]
 fn read_sqlite_database(path: String) -> Result<SqliteMetadata, String> {
     let resolved = resolve_sqlite_path(&path)?;
     ensure_sqlite_parent_exists(&resolved)?;
@@ -202,21 +215,28 @@ fn execute_sqlite_query(
         let rows = statement
             .query_map(params_from_iter(bound_params.iter()), |row| {
                 let mut object = Map::new();
+                let mut values = Vec::with_capacity(column_names.len());
 
                 for (index, column_name) in column_names.iter().enumerate() {
                     let value = row.get_ref(index)?;
-                    object.insert(column_name.clone(), sqlite_value_ref_to_json(value));
+                    let json_value = sqlite_value_ref_to_json(value);
+                    object.insert(column_name.clone(), json_value.clone());
+                    values.push(json_value);
                 }
 
-                Ok(JsonValue::Object(object))
+                Ok((JsonValue::Object(object), values))
             })
             .map_err(|err| format!("Unable to execute SQLite query: {err}"))?
-            .collect::<Result<Vec<JsonValue>, _>>()
+            .collect::<Result<Vec<(JsonValue, Vec<JsonValue>)>, _>>()
             .map_err(|err| format!("Unable to decode SQLite query rows: {err}"))?;
 
+        let (rows, values): (Vec<JsonValue>, Vec<Vec<JsonValue>>) = rows.into_iter().unzip();
+
         return Ok(SqliteQueryResult {
+            columns: column_names,
             rows_affected: rows.len(),
             rows,
+            values,
             last_insert_rowid: connection.last_insert_rowid(),
         });
     }
@@ -226,7 +246,9 @@ fn execute_sqlite_query(
         .map_err(|err| format!("Unable to execute SQLite statement: {err}"))?;
 
     Ok(SqliteQueryResult {
+        columns: Vec::new(),
         rows: Vec::new(),
+        values: Vec::new(),
         rows_affected,
         last_insert_rowid: connection.last_insert_rowid(),
     })
@@ -236,6 +258,7 @@ fn execute_sqlite_query(
 pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
+            delete_sqlite_database,
             read_sqlite_database,
             execute_sqlite_query
         ])

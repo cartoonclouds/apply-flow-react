@@ -1,3 +1,4 @@
+import DebugTools from "@/components/layout/DebugTools";
 import Sidebar from "@/components/layout/Sidebar";
 import {
   ResizableHandle,
@@ -30,6 +31,8 @@ function App() {
           </Main>
         </ResizablePanel>
       </ResizablePanelGroup>
+
+      <DebugTools />
     </AppProviders>
   );
 }

@@ -1,6 +1,7 @@
+import Badge from "@/components/ui/badge";
 import {
-    ACTION_BUTTON_SEPARATOR,
-    ActionButton,
+  ACTION_BUTTON_SEPARATOR,
+  ActionButton,
 } from "@/components/ui/data-table/action-button";
 import SortableHeader from "@/components/ui/data-table/sortable-header";
 import { sortTemporalColumn } from "@/components/ui/data-table/temporal-sorting";
@@ -33,13 +34,27 @@ export const columns: ColumnDef<Company>[] = [
     id: "contactsCount",
     accessorFn: (row) => row.contacts?.length ?? 0,
     header: ({ column }) => SortableHeader({ label: "Contacts", column }),
-    cell: ({ row }) => row.original.contacts?.length ?? 0,
+    cell: ({ row }) => {
+      const count = row.original.contacts?.length ?? 0;
+      return (
+        <Badge className="border-violet-200 bg-violet-50 text-violet-700">
+          {count}
+        </Badge>
+      );
+    },
   },
   {
     id: "applicationsCount",
     accessorFn: (row) => row.applications?.length ?? 0,
     header: ({ column }) => SortableHeader({ label: "Applications", column }),
-    cell: ({ row }) => row.original.applications?.length ?? 0,
+    cell: ({ row }) => {
+      const count = row.original.applications?.length ?? 0;
+      return (
+        <Badge className="border-amber-200 bg-amber-50 text-amber-700">
+          {count}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "updatedAt",

@@ -1,3 +1,4 @@
+import { MENU_SEPARATOR } from "@/repositories/SidebarRepository";
 import type { LucideIcon } from "lucide-react";
 
 export type AppRoute =
@@ -7,12 +8,14 @@ export type AppRoute =
   | "/companies"
   | "/contacts";
 
-export type MenuItem = {
-  id: number;
-  icon: LucideIcon;
-  label: string;
-  route: AppRoute;
-};
+export type MenuItem =
+  | {
+      id: number;
+      icon: LucideIcon;
+      label: string;
+      route: AppRoute;
+    }
+  | typeof MENU_SEPARATOR;
 
 export type User = {
   id: number;

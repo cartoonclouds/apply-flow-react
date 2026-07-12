@@ -1,6 +1,7 @@
+import Badge from "@/components/ui/badge";
 import {
-    ACTION_BUTTON_SEPARATOR,
-    ActionButton,
+  ACTION_BUTTON_SEPARATOR,
+  ActionButton,
 } from "@/components/ui/data-table/action-button";
 import SortableHeader from "@/components/ui/data-table/sortable-header";
 import { sortTemporalColumn } from "@/components/ui/data-table/temporal-sorting";
@@ -23,6 +24,18 @@ export const columns: ColumnDef<Contact>[] = [
   {
     accessorKey: "type",
     header: ({ column }) => SortableHeader({ label: "Type", column }),
+    cell: ({ row }) => {
+      const type = row.original.type;
+      const label = type
+        ? `${type.charAt(0).toUpperCase()}${type.slice(1)}`
+        : "-";
+
+      return (
+        <Badge className="border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700">
+          {label}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "email",
@@ -38,7 +51,14 @@ export const columns: ColumnDef<Contact>[] = [
     id: "applicationsCount",
     accessorFn: (row) => row.applications?.length ?? 0,
     header: ({ column }) => SortableHeader({ label: "Applications", column }),
-    cell: ({ row }) => row.original.applications?.length ?? 0,
+    cell: ({ row }) => {
+      const count = row.original.applications?.length ?? 0;
+      return (
+        <Badge className="border-indigo-200 bg-indigo-50 text-indigo-700">
+          {count}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "updatedAt",

@@ -9,6 +9,11 @@ description = "Allows executing parameterized SQLite queries against a local SQL
 commands.allow = ["execute_sqlite_query"]
 
 [[permission]]
+identifier = "allow-delete-sqlite-database"
+description = "Allows deleting a local SQLite database path via the delete_sqlite_database command."
+commands.allow = ["delete_sqlite_database"]
+
+[[permission]]
 identifier = "deny-read-sqlite-database"
 description = "Denies reading metadata from a local SQLite database path via the read_sqlite_database command."
 commands.deny = ["read_sqlite_database"]
@@ -17,3 +22,8 @@ commands.deny = ["read_sqlite_database"]
 identifier = "deny-execute-sqlite-query"
 description = "Denies executing parameterized SQLite queries against a local SQLite database path via the execute_sqlite_query command."
 commands.deny = ["execute_sqlite_query"]
+
+[[permission]]
+identifier = "deny-delete-sqlite-database"
+description = "Denies deleting a local SQLite database path via the delete_sqlite_database command."
+commands.deny = ["delete_sqlite_database"]

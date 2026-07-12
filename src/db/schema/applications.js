@@ -1,13 +1,16 @@
 import { sql } from "drizzle-orm";
 import {
-    boolean,
-    doublePrecision,
-    integer,
-    pgTable,
-    text,
+  boolean,
+  doublePrecision,
+  integer,
+  pgTable,
+  text,
 } from "drizzle-orm/pg-core";
 
-import { temporalTimestamp } from "../custom-types/temporalTimestamp";
+import {
+  nullableTemporalTimestamp,
+  temporalTimestamp,
+} from "../custom-types/temporalTimestamp";
 import { companies } from "./companies";
 import { attendanceTypeEnum, employmentTypeEnum } from "./enums";
 
@@ -34,7 +37,7 @@ export const applications = pgTable("applications", {
   benefits: text("benefits"),
   priority: integer("priority").notNull().default(3),
   isArchived: boolean("is_archived").notNull().default(false),
-  deletedAt: temporalTimestamp("deleted_at"),
+  deletedAt: nullableTemporalTimestamp("deleted_at"),
   createdAt: temporalTimestamp("created_at")
     .notNull()
     .default(sql`now()`),

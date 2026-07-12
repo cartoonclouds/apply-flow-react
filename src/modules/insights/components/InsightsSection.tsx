@@ -33,7 +33,7 @@ function InsightsSection() {
   }, []);
 
   return (
-    <ItemGroup className="grid grid-cols-1 gap-4 @md/main:grid-cols-2 @lg/main:grid-cols-3 @xl/main:grid-cols-4">
+    <ItemGroup className="grid grid-cols-1 gap-4 @md/main:grid-cols-2 @lg/main:grid-cols-3">
       {insights.map((insight, index) => (
         <InsightCard
           key={index}

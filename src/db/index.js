@@ -3,43 +3,48 @@ import { drizzle as drizzlePglite } from "drizzle-orm/pglite";
 import { drizzle as drizzleSqliteProxy } from "drizzle-orm/sqlite-proxy";
 import { migrateTauriSqliteDatabase } from "./migrate";
 import {
-    executeSqlite,
-    getDatabaseMode,
-    getDatabaseName,
-    getTauriSqlitePath,
-    invokeTauri,
-    isTauriRuntime,
+  DEFAULT_DB_NAME,
+  deleteIndexedDbDatabase,
+  deleteSqliteDatabase,
+  executeSqlite,
+  getDatabaseMode,
+  invokeTauri,
+  isTauriRuntime,
+  TAURI_SQLITE_PATH,
 } from "./runtime";
 import * as schema from "./schema/index.js";
 
-const databaseName = getDatabaseName();
 const dbMode = getDatabaseMode();
 
 function createIndexedDbClient() {
-  return new PGlite(`idb://${databaseName}`);
+  return new PGlite(`idb://${DEFAULT_DB_NAME}`);
 }
 
 function createTauriSqliteDb() {
-  const tauriSqlitePath = getTauriSqlitePath();
-
-  if (!tauriSqlitePath) {
-    throw new Error(
-      "VITE_TAURI_SQLITE_PATH is required when VITE_DB_DRIVER=tauri-sqlite",
-    );
-  }
-
   if (!isTauriRuntime()) {
     throw new Error(
-      "VITE_DB_DRIVER=tauri-sqlite requires the Tauri runtime (desktop app)",
+      "TAURI_SQLITE_PATH=tauri-sqlite requires the Tauri runtime (desktop app)",
     );
   }
 
   return drizzleSqliteProxy(
-    async (sql, params) => {
-      const result = await executeSqlite(tauriSqlitePath, sql, params);
+    async (sql, params, method) => {
+      const result = await executeSqlite(TAURI_SQLITE_PATH, sql, params);
+
+      if (method === "get") {
+        return {
+          rows: result?.values?.[0] ?? [],
+        };
+      }
+
+      if (method === "all" || method === "values") {
+        return {
+          rows: result?.values ?? [],
+        };
+      }
 
       return {
-        rows: result?.rows ?? [],
+        rows: [],
       };
     },
     { schema },
@@ -61,13 +66,24 @@ export async function verifyDatabaseConnection() {
     return;
   }
 
-  const tauriSqlitePath = getTauriSqlitePath();
-
   await invokeTauri("read_sqlite_database", {
-    path: tauriSqlitePath,
+    path: TAURI_SQLITE_PATH,
   });
 
-  await migrateTauriSqliteDatabase(tauriSqlitePath);
+  await migrateTauriSqliteDatabase(TAURI_SQLITE_PATH);
 
-  await executeSqlite(tauriSqlitePath, "SELECT 1 AS healthy", []);
+  await executeSqlite(TAURI_SQLITE_PATH, "SELECT 1 AS healthy", []);
+}
+
+export async function resetDatabase() {
+  if (useTauriSqlite) {
+    await deleteSqliteDatabase(TAURI_SQLITE_PATH);
+    return;
+  }
+
+  if (client && typeof client.close === "function") {
+    await client.close();
+  }
+
+  await deleteIndexedDbDatabase(DEFAULT_DB_NAME);
 }

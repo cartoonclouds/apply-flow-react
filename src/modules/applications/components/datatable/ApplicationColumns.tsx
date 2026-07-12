@@ -1,3 +1,4 @@
+import Badge from "@/components/ui/badge";
 import {
   ACTION_BUTTON_SEPARATOR,
   ActionButton,
@@ -6,9 +7,9 @@ import SortableHeader from "@/components/ui/data-table/sortable-header";
 import { sortTemporalColumn } from "@/components/ui/data-table/temporal-sorting";
 import { formatRelativeDateTime } from "@/lib/date-utils";
 import {
-  ApplicationAttendanceType,
-  ApplicationEmploymentType,
-} from "@/modules/applications/enums";
+  getAttendanceLabel,
+  getEmploymentLabel,
+} from "@/modules/applications/labels";
 import type { Application } from "@/modules/applications/types";
 import { ColumnDef } from "@tanstack/react-table";
 import React from "react";
@@ -29,18 +30,11 @@ export const columns: ColumnDef<Application>[] = [
     header: ({ column }) =>
       SortableHeader({ label: "Attendance Type", column }),
     cell: ({ row }) => {
-      const attendanceType = row.original.attendanceType;
+      const label = getAttendanceLabel(row.original.attendanceType);
 
-      switch (attendanceType) {
-        case ApplicationAttendanceType.OnSite:
-          return "Onsite";
-        case ApplicationAttendanceType.Remote:
-          return "Remote";
-        case ApplicationAttendanceType.Hybrid:
-          return "Hybrid";
-        default:
-          return attendanceType;
-      }
+      return (
+        <Badge className="border-sky-200 bg-sky-50 text-sky-700">{label}</Badge>
+      );
     },
   },
   {
@@ -48,22 +42,13 @@ export const columns: ColumnDef<Application>[] = [
     header: ({ column }) =>
       SortableHeader({ label: "Employment Type", column }),
     cell: ({ row }) => {
-      const employmentType = row.original.employmentType;
+      const label = getEmploymentLabel(row.original.employmentType);
 
-      switch (employmentType) {
-        case ApplicationEmploymentType.FullTime:
-          return "Full Time";
-        case ApplicationEmploymentType.PartTime:
-          return "Part Time";
-        case ApplicationEmploymentType.Contract:
-          return "Contract";
-        case ApplicationEmploymentType.Internship:
-          return "Internship";
-        case ApplicationEmploymentType.Volunteer:
-          return "Volunteer";
-        default:
-          return employmentType;
-      }
+      return (
+        <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700">
+          {label}
+        </Badge>
+      );
     },
   },
   {

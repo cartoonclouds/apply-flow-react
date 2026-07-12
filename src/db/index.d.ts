@@ -11,3 +11,4 @@ export const dbMode: "indexeddb" | "tauri-sqlite";
 export const client: PGlite | null;
 export const db: DrizzleAppDatabase;
 export function verifyDatabaseConnection(): Promise<void>;
+export function resetDatabase(): Promise<void>;
