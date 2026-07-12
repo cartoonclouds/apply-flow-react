@@ -10,9 +10,9 @@ import {
 import {
   nullableTemporalTimestamp,
   temporalTimestamp,
-} from "../custom-types/temporalTimestamp";
-import { companies } from "./companies";
-import { attendanceTypeEnum, employmentTypeEnum } from "./enums";
+} from "../custom-types/temporalTimestamp.ts";
+import { companies } from "./companies.js";
+import { attendanceTypeEnum, employmentTypeEnum } from "./enums.js";
 
 export const applications = pgTable("applications", {
   id: text("id").primaryKey().notNull(),

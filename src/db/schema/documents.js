@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { integer, pgTable, text } from "drizzle-orm/pg-core";
 
-import { temporalTimestamp } from "../custom-types/temporalTimestamp";
+import { temporalTimestamp } from "../custom-types/temporalTimestamp.ts";
 
 export const documents = pgTable("documents", {
   id: text("id").primaryKey().notNull(),

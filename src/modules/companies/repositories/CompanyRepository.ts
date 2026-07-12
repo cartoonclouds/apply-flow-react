@@ -1,7 +1,5 @@
 import type { DrizzleAppDatabase } from "@/db";
-import * as schema from "@/db/schema";
 import { Repository } from "@/types";
-import { eq } from "drizzle-orm";
 import type { Company, NewCompanyRow } from "../types";
 
 export class CompanyRepository implements Repository<
@@ -14,7 +12,7 @@ export class CompanyRepository implements Repository<
 
   public async get(id: string): Promise<Company | null> {
     const row = await this.db.query.companies.findFirst({
-      where: eq(schema.companies.id, id),
+      where: { id },
       with: {
         contacts: true,
         applications: true,

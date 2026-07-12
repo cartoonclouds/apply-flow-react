@@ -1,9 +1,9 @@
 import { sql } from "drizzle-orm";
 import { doublePrecision, pgTable, text } from "drizzle-orm/pg-core";
 
-import { temporalTimestamp } from "../custom-types/temporalTimestamp";
-import { companies } from "./companies";
-import { contactTypeEnum } from "./enums";
+import { temporalTimestamp } from "../custom-types/temporalTimestamp.ts";
+import { companies } from "./companies.js";
+import { contactTypeEnum } from "./enums.js";
 
 export const contacts = pgTable("contacts", {
   id: text("id").primaryKey().notNull(),

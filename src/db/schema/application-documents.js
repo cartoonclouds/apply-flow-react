@@ -1,9 +1,9 @@
 import { sql } from "drizzle-orm";
 import { pgTable, primaryKey, text } from "drizzle-orm/pg-core";
 
-import { temporalTimestamp } from "../custom-types/temporalTimestamp";
-import { applications } from "./applications";
-import { documents } from "./documents";
+import { temporalTimestamp } from "../custom-types/temporalTimestamp.ts";
+import { applications } from "./applications.js";
+import { documents } from "./documents.js";
 
 export const applicationDocuments = pgTable(
   "application_documents",

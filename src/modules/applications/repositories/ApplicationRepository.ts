@@ -1,6 +1,5 @@
 import type { DrizzleAppDatabase } from "@/db";
 import * as schema from "@/db/schema";
-import { mapDefined } from "@/lib/map-defined";
 import { Repository } from "@/types";
 import { eq } from "drizzle-orm";
 import type { Application, NewApplicationRow } from "../types";
@@ -15,19 +14,11 @@ export class ApplicationRepository implements Repository<
 
   public async get(id: string): Promise<Application | null> {
     const row = await this.db.query.applications.findFirst({
-      where: eq(schema.applications.id, id),
+      where: { id },
       with: {
         company: true,
-        contacts: {
-          with: {
-            contact: true,
-          },
-        },
-        documents: {
-          with: {
-            document: true,
-          },
-        },
+        contacts: true,
+        documents: true,
       },
     });
 
@@ -40,8 +31,8 @@ export class ApplicationRepository implements Repository<
       attendanceType: row.attendanceType as Application["attendanceType"],
       employmentType: row.employmentType as Application["employmentType"],
       company: row.company,
-      contacts: mapDefined(row.contacts, (relation) => relation.contact),
-      documents: mapDefined(row.documents, (relation) => relation.document),
+      contacts: row.contacts,
+      documents: row.documents,
     };
   }
 
@@ -103,16 +94,8 @@ export class ApplicationRepository implements Repository<
     const applicationRows = await this.db.query.applications.findMany({
       with: {
         company: true,
-        contacts: {
-          with: {
-            contact: true,
-          },
-        },
-        documents: {
-          with: {
-            document: true,
-          },
-        },
+        contacts: true,
+        documents: true,
       },
     });
 
@@ -121,8 +104,8 @@ export class ApplicationRepository implements Repository<
       attendanceType: row.attendanceType as Application["attendanceType"],
       employmentType: row.employmentType as Application["employmentType"],
       company: row.company,
-      contacts: mapDefined(row.contacts, (relation) => relation.contact),
-      documents: mapDefined(row.documents, (relation) => relation.document),
+      contacts: row.contacts,
+      documents: row.documents,
     }));
   }
 }

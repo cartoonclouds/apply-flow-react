@@ -1,7 +1,5 @@
 import { mapDefined } from "@/lib/map-defined";
 import type { PgliteDatabase } from "drizzle-orm/pglite";
-import sqliteJournal from "../../drizzle-sqlite/meta/_journal.json";
-import journal from "../../drizzle/meta/_journal.json";
 import { SQLITE_MIGRATIONS_TABLE, executeSqlite } from "./runtime";
 
 type BrowserMigratableDatabase = {
@@ -18,26 +16,48 @@ type BrowserMigratableDatabase = {
 const MIGRATIONS_FOLDER = "./drizzle";
 const MIGRATIONS_TABLE = "__drizzle_migrations";
 const MIGRATIONS_SCHEMA = "drizzle";
-const SQLITE_RELATION_COMPATIBILITY_VIEWS = [
-  ["companies_contacts", "contacts"],
-  ["companies_applications", "applications"],
-  ["contacts_applications", "application_contacts"],
-  ["applications_contacts", "application_contacts"],
-  ["applications_documents", "application_documents"],
-  ["documents_application", "application_documents"],
-] as const;
 
-const browserMigrationModules = import.meta.glob("../../drizzle/*.sql", {
-  query: "?raw",
-  import: "default",
-  eager: true,
-}) as Record<string, string>;
+const browserMigrationModules = import.meta.glob(
+  "../../drizzle/*/migration.sql",
+  {
+    query: "?raw",
+    import: "default",
+    eager: true,
+  },
+) as Record<string, string>;
 
-const sqliteMigrationModules = import.meta.glob("../../drizzle-sqlite/*.sql", {
-  query: "?raw",
-  import: "default",
-  eager: true,
-}) as Record<string, string>;
+const sqliteMigrationModules = import.meta.glob(
+  "../../drizzle-sqlite/*/migration.sql",
+  {
+    query: "?raw",
+    import: "default",
+    eager: true,
+  },
+) as Record<string, string>;
+
+function getOrderedMigrations(modules: Record<string, string>) {
+  return Object.entries(modules)
+    .map(([modulePath, sqlText]) => {
+      const hash = modulePath.split("/").at(-2);
+
+      if (!hash) {
+        throw new Error(`Invalid migration module path: ${modulePath}`);
+      }
+
+      return {
+        hash,
+        sqlText,
+      };
+    })
+    .sort((left, right) => left.hash.localeCompare(right.hash));
+}
+
+function getMigrationOrderValue(hash: string, index: number) {
+  const sortablePrefix = hash.split("_")[0];
+  const parsedPrefix = Number.parseInt(sortablePrefix || "", 10);
+
+  return Number.isNaN(parsedPrefix) ? index + 1 : parsedPrefix;
+}
 
 function splitMigrationStatements(sqlText: string): string[] {
   return mapDefined(sqlText.split("--> statement-breakpoint"), (statement) => {
@@ -47,37 +67,23 @@ function splitMigrationStatements(sqlText: string): string[] {
 }
 
 function getBrowserMigrations() {
-  return journal.entries.map((entry) => {
-    const migrationPath = `../../drizzle/${entry.tag}.sql`;
-    const sqlText = browserMigrationModules[migrationPath];
-
-    if (!sqlText) {
-      throw new Error(`Missing migration SQL file: ${migrationPath}`);
-    }
-
-    return {
+  return getOrderedMigrations(browserMigrationModules).map(
+    ({ hash, sqlText }, index) => ({
       sql: splitMigrationStatements(sqlText),
-      bps: entry.breakpoints,
-      folderMillis: entry.when,
-      hash: entry.tag,
-    };
-  });
+      bps: false,
+      folderMillis: getMigrationOrderValue(hash, index),
+      hash,
+    }),
+  );
 }
 
 function getSqliteMigrations() {
-  return sqliteJournal.entries.map((entry) => {
-    const migrationPath = `../../drizzle-sqlite/${entry.tag}.sql`;
-    const sqlText = sqliteMigrationModules[migrationPath];
-
-    if (!sqlText) {
-      throw new Error(`Missing migration SQL file: ${migrationPath}`);
-    }
-
-    return {
-      hash: entry.tag,
+  return getOrderedMigrations(sqliteMigrationModules).map(
+    ({ hash, sqlText }) => ({
+      hash,
       statements: splitMigrationStatements(sqlText),
-    };
-  });
+    }),
+  );
 }
 
 function isIgnorableSqliteMigrationError(error: unknown): boolean {
@@ -132,16 +138,6 @@ async function getAppliedSqliteMigrationHashes(path: string) {
   return new Set((result?.rows || []).map((row) => String(row.hash)));
 }
 
-async function ensureSqliteRelationCompatibilityViews(path: string) {
-  for (const [viewName, tableName] of SQLITE_RELATION_COMPATIBILITY_VIEWS) {
-    await executeSqlite(
-      path,
-      `CREATE VIEW IF NOT EXISTS "${viewName}" AS SELECT * FROM "${tableName}";`,
-      [],
-    );
-  }
-}
-
 export async function migrateTauriSqliteDatabase(path: string) {
   await ensureSqliteMigrationsTable(path);
 
@@ -169,6 +165,4 @@ export async function migrateTauriSqliteDatabase(path: string) {
       [migration.hash],
     );
   }
-
-  await ensureSqliteRelationCompatibilityViews(path);
 }

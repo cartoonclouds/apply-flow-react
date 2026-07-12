@@ -2,6 +2,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { drizzle as drizzlePglite } from "drizzle-orm/pglite";
 import { drizzle as drizzleSqliteProxy } from "drizzle-orm/sqlite-proxy";
 import { migrateTauriSqliteDatabase } from "./migrate";
+import { relations } from "./relations.js";
 import {
   DEFAULT_DB_NAME,
   deleteIndexedDbDatabase,
@@ -12,7 +13,6 @@ import {
   isTauriRuntime,
   TAURI_SQLITE_PATH,
 } from "./runtime";
-import * as schema from "./schema/index.js";
 
 const dbMode = getDatabaseMode();
 
@@ -47,7 +47,7 @@ function createTauriSqliteDb() {
         rows: [],
       };
     },
-    { schema },
+    { relations },
   );
 }
 
@@ -59,7 +59,7 @@ export const client = useTauriSqlite ? null : createIndexedDbClient();
 
 export const db = useTauriSqlite
   ? createTauriSqliteDb()
-  : drizzlePglite(client, { schema });
+  : drizzlePglite(client, { relations });
 
 export async function verifyDatabaseConnection() {
   if (!useTauriSqlite) {

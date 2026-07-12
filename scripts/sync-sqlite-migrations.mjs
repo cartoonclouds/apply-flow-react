@@ -1,4 +1,4 @@
-import { mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -7,10 +7,16 @@ const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "..");
 
 const pgDir = path.join(repoRoot, "drizzle");
-const pgMetaPath = path.join(pgDir, "meta", "_journal.json");
 const sqliteDir = path.join(repoRoot, "drizzle-sqlite");
-const sqliteMetaDir = path.join(sqliteDir, "meta");
-const sqliteMetaPath = path.join(sqliteMetaDir, "_journal.json");
+
+async function listMigrationDirectories(dirPath) {
+  const entries = await readdir(dirPath, { withFileTypes: true });
+
+  return entries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort((left, right) => left.localeCompare(right));
+}
 
 function normalizePgStatementToSqlite(statement) {
   let normalized = statement.trim();
@@ -56,47 +62,38 @@ function renderSqliteMigration(sqlText) {
 }
 
 async function syncSqliteMigrations() {
-  const pgJournalRaw = await readFile(pgMetaPath, "utf8");
-  const pgJournal = JSON.parse(pgJournalRaw);
+  const pgMigrationDirs = await listMigrationDirectories(pgDir);
 
   await mkdir(sqliteDir, { recursive: true });
-  await mkdir(sqliteMetaDir, { recursive: true });
 
-  const validMigrationFiles = new Set(
-    pgJournal.entries.map((entry) => `${entry.tag}.sql`),
-  );
+  const validMigrationDirs = new Set(pgMigrationDirs);
 
-  const existingSqliteFiles = await readdir(sqliteDir);
-  for (const fileName of existingSqliteFiles) {
-    if (!fileName.endsWith(".sql")) {
+  const existingSqliteEntries = await readdir(sqliteDir, {
+    withFileTypes: true,
+  });
+  for (const entry of existingSqliteEntries) {
+    if (entry.isDirectory() && validMigrationDirs.has(entry.name)) {
       continue;
     }
 
-    if (!validMigrationFiles.has(fileName)) {
-      await unlink(path.join(sqliteDir, fileName));
-    }
+    await rm(path.join(sqliteDir, entry.name), {
+      recursive: true,
+      force: true,
+    });
   }
 
-  for (const entry of pgJournal.entries) {
-    const pgMigrationPath = path.join(pgDir, `${entry.tag}.sql`);
-    const sqliteMigrationPath = path.join(sqliteDir, `${entry.tag}.sql`);
+  for (const migrationDir of pgMigrationDirs) {
+    const pgMigrationPath = path.join(pgDir, migrationDir, "migration.sql");
+    const sqliteMigrationDir = path.join(sqliteDir, migrationDir);
+    const sqliteMigrationPath = path.join(sqliteMigrationDir, "migration.sql");
 
     const pgSql = await readFile(pgMigrationPath, "utf8");
     const sqliteSql = renderSqliteMigration(pgSql);
+
+    await rm(sqliteMigrationDir, { recursive: true, force: true });
+    await mkdir(sqliteMigrationDir, { recursive: true });
     await writeFile(sqliteMigrationPath, sqliteSql, "utf8");
   }
-
-  const sqliteJournal = {
-    version: pgJournal.version,
-    dialect: "sqlite",
-    entries: pgJournal.entries,
-  };
-
-  await writeFile(
-    sqliteMetaPath,
-    `${JSON.stringify(sqliteJournal, null, 2)}\n`,
-    "utf8",
-  );
 }
 
 syncSqliteMigrations().catch((error) => {

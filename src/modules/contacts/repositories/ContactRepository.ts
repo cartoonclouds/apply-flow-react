@@ -1,8 +1,5 @@
 import type { DrizzleAppDatabase } from "@/db";
-import * as schema from "@/db/schema";
-import { mapDefined } from "@/lib/map-defined";
 import { Repository } from "@/types";
-import { eq } from "drizzle-orm";
 import type { Contact, NewContactRow } from "../types";
 
 export class ContactRepository implements Repository<
@@ -15,14 +12,10 @@ export class ContactRepository implements Repository<
 
   public async get(id: string): Promise<Contact | null> {
     const row = await this.db.query.contacts.findFirst({
-      where: eq(schema.contacts.id, id),
+      where: { id },
       with: {
         company: true,
-        applications: {
-          with: {
-            application: true,
-          },
-        },
+        applications: true,
       },
     });
 
@@ -33,10 +26,7 @@ export class ContactRepository implements Repository<
     return {
       ...row,
       company: row.company,
-      applications: mapDefined(
-        row.applications,
-        (relation) => relation.application,
-      ),
+      applications: row.applications,
     };
   }
 
@@ -56,21 +46,14 @@ export class ContactRepository implements Repository<
     const contactRows = await this.db.query.contacts.findMany({
       with: {
         company: true,
-        applications: {
-          with: {
-            application: true,
-          },
-        },
+        applications: true,
       },
     });
 
     return contactRows.map((row) => ({
       ...row,
       company: row.company,
-      applications: mapDefined(
-        row.applications,
-        (relation) => relation.application,
-      ),
+      applications: row.applications,
     }));
   }
 }

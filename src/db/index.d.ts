@@ -1,11 +1,13 @@
 import type { PGlite } from "@electric-sql/pglite";
 import type { PgliteDatabase } from "drizzle-orm/pglite";
-import type { SqliteRemoteDatabase } from "drizzle-orm/sqlite-proxy";
-import type * as schema from "./schema";
+import type { relations } from "./relations";
 
-export type DrizzleAppDatabase =
-  | PgliteDatabase<typeof schema>
-  | SqliteRemoteDatabase<typeof schema>;
+type AppDatabaseSurface = Pick<
+  PgliteDatabase<typeof relations>,
+  "query" | "insert" | "update" | "delete"
+>;
+
+export type DrizzleAppDatabase = AppDatabaseSurface;
 
 export const dbMode: "indexeddb" | "tauri-sqlite";
 export const client: PGlite | null;
