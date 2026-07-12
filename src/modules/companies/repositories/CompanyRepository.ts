@@ -1,8 +1,7 @@
 import type { DrizzleAppDatabase } from "@/db";
 import * as schema from "@/db/schema";
-import { pluck } from "@/lib/map-defined";
 import { Repository } from "@/types";
-import { inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { Company, NewCompanyRow } from "../types";
 
 export class CompanyRepository implements Repository<
@@ -13,8 +12,24 @@ export class CompanyRepository implements Repository<
 > {
   constructor(private readonly db: DrizzleAppDatabase) {}
 
-  get(_id: string): Promise<Company | null> {
-    throw new Error("Method not implemented.");
+  public async get(id: string): Promise<Company | null> {
+    const row = await this.db.query.companies.findFirst({
+      where: eq(schema.companies.id, id),
+      with: {
+        contacts: true,
+        applications: true,
+      },
+    });
+
+    if (!row) {
+      return null;
+    }
+
+    return {
+      ...row,
+      contacts: row.contacts,
+      applications: row.applications,
+    };
   }
 
   create(_data: NewCompanyRow): Promise<Company> {
@@ -30,48 +45,17 @@ export class CompanyRepository implements Repository<
   }
 
   public async list(): Promise<Company[]> {
-    const companyRows = await this.db.query.companies.findMany();
-
-    if (companyRows.length === 0) {
-      return [];
-    }
-
-    const companyIds = pluck(companyRows, "id");
-    const [contactRows, applicationRows] = await Promise.all([
-      this.db.query.contacts.findMany({
-        where: inArray(schema.contacts.companyId, companyIds),
-      }),
-      this.db.query.applications.findMany({
-        where: inArray(schema.applications.companyId, companyIds),
-      }),
-    ]);
-
-    const contactsByCompanyId = new Map<string, Company["contacts"]>();
-    for (const contact of contactRows) {
-      if (!contact.companyId) {
-        continue;
-      }
-
-      const existing = contactsByCompanyId.get(contact.companyId) ?? [];
-      existing.push(contact);
-      contactsByCompanyId.set(contact.companyId, existing);
-    }
-
-    const applicationsByCompanyId = new Map<string, Company["applications"]>();
-    for (const application of applicationRows) {
-      if (!application.companyId) {
-        continue;
-      }
-
-      const existing = applicationsByCompanyId.get(application.companyId) ?? [];
-      existing.push(application);
-      applicationsByCompanyId.set(application.companyId, existing);
-    }
+    const companyRows = await this.db.query.companies.findMany({
+      with: {
+        contacts: true,
+        applications: true,
+      },
+    });
 
     return companyRows.map((row) => ({
       ...row,
-      contacts: contactsByCompanyId.get(row.id) ?? [],
-      applications: applicationsByCompanyId.get(row.id) ?? [],
+      contacts: row.contacts,
+      applications: row.applications,
     }));
   }
 }
