@@ -20,7 +20,7 @@ function AddApplicationButton() {
         void handleClick();
       }}
     >
-      Add Application
+      New Application
     </Button>
   );
 }

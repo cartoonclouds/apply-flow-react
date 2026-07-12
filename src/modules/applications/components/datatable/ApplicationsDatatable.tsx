@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import Datatable from "@/components/ui/data-table/data-table";
 import { db } from "@/db";
 import {
@@ -127,12 +126,6 @@ function ApplicationsDatatable() {
 
   return (
     <div className="space-y-3">
-      <div className="flex justify-end">
-        <Button className="" type="button" size="sm" onClick={openCreateDrawer}>
-          New Application
-        </Button>
-      </div>
-
       <Datatable
         columns={columns}
         data={applicationsData}
