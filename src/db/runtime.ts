@@ -2,7 +2,7 @@ export type DbMode = "indexeddb" | "tauri-sqlite";
 
 export const DEFAULT_DB_NAME = "apply-flow";
 export const SQLITE_MIGRATIONS_TABLE = "__drizzle_migrations";
-export const TAURI_SQLITE_PATH = `./${DEFAULT_DB_NAME}.sqlite`;
+export const TAURI_SQLITE_PATH = `app-local-data://${DEFAULT_DB_NAME}.sqlite`;
 
 export function isTauriRuntime(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;

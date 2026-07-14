@@ -6,6 +6,7 @@ use rusqlite::{
 use serde::Serialize;
 use serde_json::{Map, Number, Value as JsonValue};
 use std::path::PathBuf;
+use tauri::{AppHandle, Manager};
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -62,11 +63,29 @@ fn json_to_sqlite_value(value: &JsonValue) -> Result<SqliteValue, String> {
     }
 }
 
-fn resolve_sqlite_path(raw_path: &str) -> Result<PathBuf, String> {
+fn resolve_sqlite_path(app: &AppHandle, raw_path: &str) -> Result<PathBuf, String> {
     let trimmed = raw_path.trim();
 
     if trimmed.is_empty() {
         return Err("Path cannot be empty".to_string());
+    }
+
+    if let Some(relative) = trimmed.strip_prefix("app-local-data://") {
+        let base = app
+            .path()
+            .app_local_data_dir()
+            .map_err(|err| format!("Unable to resolve app local data directory: {err}"))?;
+
+        return Ok(base.join(relative));
+    }
+
+    if let Some(relative) = trimmed.strip_prefix("app-data://") {
+        let base = app
+            .path()
+            .app_data_dir()
+            .map_err(|err| format!("Unable to resolve app data directory: {err}"))?;
+
+        return Ok(base.join(relative));
     }
 
     let candidate = PathBuf::from(trimmed);
@@ -147,8 +166,8 @@ fn ensure_sqlite_parent_exists(path: &PathBuf) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn delete_sqlite_database(path: String) -> Result<(), String> {
-    let resolved = resolve_sqlite_path(&path)?;
+fn delete_sqlite_database(app: AppHandle, path: String) -> Result<(), String> {
+    let resolved = resolve_sqlite_path(&app, &path)?;
 
     match std::fs::remove_file(&resolved) {
         Ok(()) => Ok(()),
@@ -158,8 +177,8 @@ fn delete_sqlite_database(path: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn read_sqlite_database(path: String) -> Result<SqliteMetadata, String> {
-    let resolved = resolve_sqlite_path(&path)?;
+fn read_sqlite_database(app: AppHandle, path: String) -> Result<SqliteMetadata, String> {
+    let resolved = resolve_sqlite_path(&app, &path)?;
     ensure_sqlite_parent_exists(&resolved)?;
 
     let connection = Connection::open(&resolved)
@@ -186,11 +205,12 @@ fn read_sqlite_database(path: String) -> Result<SqliteMetadata, String> {
 
 #[tauri::command]
 fn execute_sqlite_query(
+    app: AppHandle,
     path: String,
     sql: String,
     params: Vec<JsonValue>,
 ) -> Result<SqliteQueryResult, String> {
-    let resolved = resolve_sqlite_path(&path)?;
+    let resolved = resolve_sqlite_path(&app, &path)?;
     ensure_sqlite_parent_exists(&resolved)?;
 
     let connection = Connection::open(&resolved)
