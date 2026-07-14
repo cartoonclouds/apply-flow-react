@@ -130,7 +130,7 @@ async function seedFactoryData(targetDb: unknown, count: number) {
   });
 }
 
-function pickValue<T>(values: T[], index: number): T {
+function pickValue<T>(values: readonly T[], index: number): T {
   return values[index % values.length];
 }
 
