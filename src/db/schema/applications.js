@@ -1,21 +1,25 @@
 import { sql } from "drizzle-orm";
 import {
-  boolean,
-  doublePrecision,
-  integer,
-  pgTable,
-  text,
+    boolean,
+    doublePrecision,
+    integer,
+    pgTable,
+    text,
 } from "drizzle-orm/pg-core";
 
 import {
-  nullableTemporalTimestamp,
-  temporalTimestamp,
+    nullableTemporalTimestamp,
+    temporalTimestamp,
 } from "../custom-types/temporalTimestamp.ts";
+import { applicationStages } from "./application-stages.js";
 import { companies } from "./companies.js";
 import { attendanceTypeEnum, employmentTypeEnum } from "./enums.js";
 
 export const applications = pgTable("applications", {
   id: text("id").primaryKey().notNull(),
+  stageId: text("stage_id").references(() => applicationStages.id, {
+    onDelete: "set null",
+  }),
   companyId: text("company_id").references(() => companies.id, {
     onDelete: "set null",
   }),

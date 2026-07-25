@@ -6,7 +6,8 @@ export type AppRoute =
   | "/applications"
   | "/calendar"
   | "/companies"
-  | "/contacts";
+  | "/contacts"
+  | "/map";
 
 export type MenuItem =
   | {

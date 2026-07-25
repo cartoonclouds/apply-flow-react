@@ -1,4 +1,4 @@
-import { useUser } from "@/context/UserContext";
+import { useUser } from "@/context/useUser";
 import { greeting } from "@/lib/date-utils";
 import AddApplicationButton from "@/modules/applications/components/AddApplicationButton";
 import NotificationIcon from "@/modules/notifications/components/NotificationIcon";

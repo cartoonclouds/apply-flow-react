@@ -16,6 +16,7 @@ export class ApplicationRepository implements Repository<
     const row = await this.db.query.applications.findFirst({
       where: { id },
       with: {
+        stage: true,
         company: true,
         contacts: true,
         documents: true,
@@ -30,6 +31,7 @@ export class ApplicationRepository implements Repository<
       ...row,
       attendanceType: row.attendanceType as Application["attendanceType"],
       employmentType: row.employmentType as Application["employmentType"],
+      stage: row.stage,
       company: row.company,
       contacts: row.contacts,
       documents: row.documents,
@@ -93,6 +95,7 @@ export class ApplicationRepository implements Repository<
   public async list(): Promise<Application[]> {
     const applicationRows = await this.db.query.applications.findMany({
       with: {
+        stage: true,
         company: true,
         contacts: true,
         documents: true,
@@ -103,6 +106,7 @@ export class ApplicationRepository implements Repository<
       ...row,
       attendanceType: row.attendanceType as Application["attendanceType"],
       employmentType: row.employmentType as Application["employmentType"],
+      stage: row.stage,
       company: row.company,
       contacts: row.contacts,
       documents: row.documents,

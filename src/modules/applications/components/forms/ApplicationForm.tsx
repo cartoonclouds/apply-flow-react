@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import SearchableSelect from "@/components/ui/searchable-select";
 import { Textarea } from "@/components/ui/textarea";
 import {
-    ApplicationAttendanceType,
-    ApplicationEmploymentType,
+  ApplicationAttendanceType,
+  ApplicationEmploymentType,
 } from "@/modules/applications/enums";
 import type { Application } from "@/modules/applications/types";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 type CompanyOption = {
   id: string;
@@ -59,7 +60,13 @@ function ApplicationForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  React.useEffect(() => {
+  const companyOptions = useMemo(
+    () =>
+      companies.map((company) => ({ value: company.id, label: company.name })),
+    [companies],
+  );
+
+  useEffect(() => {
     setValues(initialValues);
     setError(null);
   }, [initialValues]);
@@ -105,28 +112,26 @@ function ApplicationForm({
               }
               placeholder="Senior Frontend Engineer"
               required
+              autoFocus
             />
           </label>
 
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium">Company</span>
-            <select
-              className="h-8 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm"
+            <SearchableSelect
+              className=""
               value={values.companyId ?? ""}
-              onChange={(event) =>
+              options={companyOptions}
+              placeholder="No company"
+              searchPlaceholder="Search companies..."
+              emptyOptionLabel="No company"
+              onValueChange={(nextValue: string) =>
                 setValues((current) => ({
                   ...current,
-                  companyId: event.target.value || null,
+                  companyId: nextValue || null,
                 }))
               }
-            >
-              <option value="">No company</option>
-              {companies.map((company) => (
-                <option key={company.id} value={company.id}>
-                  {company.name}
-                </option>
-              ))}
-            </select>
+            />
           </label>
 
           <label className="flex flex-col gap-1.5">

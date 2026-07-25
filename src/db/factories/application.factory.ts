@@ -10,6 +10,7 @@ export async function seedApplications(
   db: unknown,
   schema: unknown,
   count = 10,
+  stageIds: string[] = [],
 ) {
   const typedSchema = schema as {
     applications?: any;
@@ -18,15 +19,19 @@ export async function seedApplications(
   const applications = typedSchema.applications;
   const companies = typedSchema.companies;
 
+  const missingTables: string[] = [];
+
   if (!applications) {
-    throw new Error(
-      "applications table is required in schema for application seeding",
-    );
+    missingTables.push("applications");
   }
 
   if (!companies) {
+    missingTables.push("companies");
+  }
+
+  if (missingTables.length > 0) {
     throw new Error(
-      "companies table is required for application relationships",
+      `seedApplications requires ${missingTables.join(" and ")} tables in schema`,
     );
   }
 
@@ -39,12 +44,17 @@ export async function seedApplications(
     throw new Error("seedApplications requires at least one seeded company");
   }
 
+  if (stageIds.length === 0) {
+    throw new Error("seedApplications requires at least one seeded stage");
+  }
+
   await (seed(db as any, { applications } as any, { count }) as any).refine(
     (funcs: any) => ({
       applications: {
         columns: {
           id: funcs.uuid(),
           companyId: funcs.valuesFromArray({ values: companyIds }),
+          stageId: funcs.valuesFromArray({ values: stageIds }),
           title: funcs.jobTitle(),
           url: funcs.default({ defaultValue: "https://example.com/job" }),
           appliedAt: funcs.timestamp(),

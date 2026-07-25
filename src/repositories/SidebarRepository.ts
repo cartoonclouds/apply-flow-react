@@ -5,6 +5,7 @@ import {
   Building2,
   CalendarIcon,
   LayoutDashboard,
+  MapPinned,
   Users,
 } from "lucide-react";
 
@@ -42,6 +43,12 @@ export class SidebarRepository {
       MENU_SEPARATOR,
       {
         id: 5,
+        label: "Map",
+        icon: MapPinned,
+        route: "/map",
+      },
+      {
+        id: 6,
         label: "Calendar",
         icon: CalendarIcon,
         route: "/calendar",

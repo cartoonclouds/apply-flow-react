@@ -1,31 +1,31 @@
-const OPEN_CREATE_DRAWER_EVENT = "applications:open-create-drawer";
-const OPEN_CREATE_DRAWER_PENDING_KEY = "applications.openCreateDrawer.pending";
+const OPEN_CREATE_MODAL_EVENT = "applications:open-create-modal";
+const OPEN_CREATE_MODAL_PENDING_KEY = "applications.openCreateModal.pending";
 
-export function triggerOpenCreateApplicationDrawer(): void {
+export function triggerOpenCreateApplicationModal(): void {
   if (typeof window === "undefined") {
     return;
   }
 
-  window.sessionStorage.setItem(OPEN_CREATE_DRAWER_PENDING_KEY, "1");
-  window.dispatchEvent(new CustomEvent(OPEN_CREATE_DRAWER_EVENT));
+  window.sessionStorage.setItem(OPEN_CREATE_MODAL_PENDING_KEY, "1");
+  window.dispatchEvent(new CustomEvent(OPEN_CREATE_MODAL_EVENT));
 }
 
-export function consumePendingCreateApplicationDrawerRequest(): boolean {
+export function consumePendingCreateApplicationModalRequest(): boolean {
   if (typeof window === "undefined") {
     return false;
   }
 
   const hasPending =
-    window.sessionStorage.getItem(OPEN_CREATE_DRAWER_PENDING_KEY) === "1";
+    window.sessionStorage.getItem(OPEN_CREATE_MODAL_PENDING_KEY) === "1";
 
   if (hasPending) {
-    window.sessionStorage.removeItem(OPEN_CREATE_DRAWER_PENDING_KEY);
+    window.sessionStorage.removeItem(OPEN_CREATE_MODAL_PENDING_KEY);
   }
 
   return hasPending;
 }
 
-export function subscribeOpenCreateApplicationDrawer(
+export function subscribeOpenCreateApplicationModal(
   handler: () => void,
 ): () => void {
   if (typeof window === "undefined") {
@@ -33,9 +33,9 @@ export function subscribeOpenCreateApplicationDrawer(
   }
 
   const listener = () => handler();
-  window.addEventListener(OPEN_CREATE_DRAWER_EVENT, listener);
+  window.addEventListener(OPEN_CREATE_MODAL_EVENT, listener);
 
   return () => {
-    window.removeEventListener(OPEN_CREATE_DRAWER_EVENT, listener);
+    window.removeEventListener(OPEN_CREATE_MODAL_EVENT, listener);
   };
 }

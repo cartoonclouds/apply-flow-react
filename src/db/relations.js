@@ -2,6 +2,7 @@ import { defineRelations } from "drizzle-orm";
 
 import { applicationContacts } from "./schema/application-contacts.js";
 import { applicationDocuments } from "./schema/application-documents.js";
+import { applicationStages } from "./schema/application-stages.js";
 import { applications } from "./schema/applications.js";
 import { companies } from "./schema/companies.js";
 import { contacts } from "./schema/contacts.js";
@@ -10,6 +11,7 @@ import { documents } from "./schema/documents.js";
 const schema = {
   applicationContacts,
   applicationDocuments,
+  applicationStages,
   applications,
   companies,
   contacts,
@@ -38,6 +40,10 @@ export const relations = defineRelations(schema, (r) => ({
     }),
   },
   applications: {
+    stage: r.one.applicationStages({
+      from: r.applications.stageId,
+      to: r.applicationStages.id,
+    }),
     company: r.one.companies({
       from: r.applications.companyId,
       to: r.companies.id,
@@ -55,6 +61,12 @@ export const relations = defineRelations(schema, (r) => ({
     applications: r.many.applications({
       from: r.documents.id.through(r.applicationDocuments.documentId),
       to: r.applications.id.through(r.applicationDocuments.applicationId),
+    }),
+  },
+  applicationStages: {
+    applications: r.many.applications({
+      from: r.applicationStages.id,
+      to: r.applications.stageId,
     }),
   },
   applicationContacts: {

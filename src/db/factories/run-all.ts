@@ -17,12 +17,14 @@ import {
 import {
   applicationContacts,
   applicationDocuments,
+  applicationStages,
   applications,
   companies,
   contacts,
   documents,
 } from "../schema/index.js";
 
+import { seedApplicationStages } from "./application-stage.factory";
 import { seedApplications } from "./application.factory";
 import { seedCompanies } from "./company.factory";
 import { seedContacts } from "./contact.factory";
@@ -30,6 +32,7 @@ import { seedDocuments } from "./document.factory";
 import { seedRelationships } from "./relationship.factory";
 
 const seedSchema = {
+  applicationStages,
   applications,
   companies,
   contacts,
@@ -84,6 +87,7 @@ function resolveParameters() {
 const REQUIRED_TABLES = [
   applicationDocuments,
   applicationContacts,
+  applicationStages,
   applications,
   contacts,
   documents,
@@ -107,9 +111,7 @@ function createFactoryClient(isBrowser: boolean) {
 }
 
 async function seedFactories(client: PGlite, count: number) {
-  const db = drizzle(client, {
-    schema: seedSchema,
-  });
+  const db = drizzle(client as any, { schema: seedSchema } as any);
 
   await migratePgliteDatabase(db as any);
   await seedFactoryData(db, count);
@@ -117,10 +119,16 @@ async function seedFactories(client: PGlite, count: number) {
 
 async function seedFactoryData(targetDb: unknown, count: number) {
   await resetSeedData(targetDb);
+  const stages = await seedApplicationStages(targetDb, { applicationStages });
   await seedCompanies(targetDb, { companies }, count);
   await seedContacts(targetDb, { contacts, companies }, count);
   await seedDocuments(targetDb, { documents }, count);
-  await seedApplications(targetDb, { applications, companies }, count);
+  await seedApplications(
+    targetDb,
+    { applications, companies },
+    count,
+    stages.map((stage) => stage.id),
+  );
   await seedRelationships(targetDb, {
     applications,
     contacts,
@@ -140,6 +148,10 @@ function createTimestamp(offsetMinutes: number): string {
 
 async function seedSqliteFactoryData(targetDb: unknown, count: number) {
   await resetSeedData(targetDb);
+
+  const stageRows = await seedApplicationStages(targetDb, {
+    applicationStages,
+  });
 
   const companyRows = Array.from({ length: count }, (_, index) => ({
     id: crypto.randomUUID(),
@@ -193,6 +205,7 @@ async function seedSqliteFactoryData(targetDb: unknown, count: number) {
   const applicationRows = companyRows.map((company, index) => ({
     id: crypto.randomUUID(),
     companyId: company.id,
+    stageId: stageRows[index % stageRows.length].id,
     title: `Role ${index + 1}`,
     url: `https://jobs.example.com/roles/${index + 1}`,
     appliedAt: createTimestamp(index + 31),

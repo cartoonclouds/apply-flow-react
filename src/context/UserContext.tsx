@@ -1,51 +1,20 @@
-// context/UserContext.tsx
-
-import { User } from "@/types";
-import {
-  default as React,
-  type ReactNode,
-  createContext,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
-
-
-interface UserContextValue {
-  user: User | null;
-  setUser: (user: User | null) => void;
-}
-
-const UserContext = createContext<UserContextValue | undefined>(undefined);
+import { UserContext, type UserContextValue } from "@/context/useUser";
+import React, { type ReactNode, useMemo, useState } from "react";
 
 interface UserProviderProps {
   children: ReactNode;
 }
 
 export function UserProvider({ children }: UserProviderProps) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserContextValue["user"]>(null);
 
   const value = useMemo(
     () => ({
       user,
       setUser,
     }),
-    [user]
+    [user],
   );
 
-  return (
-    <UserContext.Provider value={value}>
-      {children}
-    </UserContext.Provider>
-  );
-}
-
-export function useUser() {
-  const context = useContext(UserContext);
-
-  if (!context) {
-    throw new Error("useUser must be used inside UserProvider");
-  }
-
-  return context;
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 }

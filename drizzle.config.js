@@ -8,6 +8,7 @@ export default defineConfig({
   schema: [
     "./src/db/schema/application-contacts.js",
     "./src/db/schema/application-documents.js",
+    "./src/db/schema/application-stages.js",
     "./src/db/schema/applications.js",
     "./src/db/schema/companies.js",
     "./src/db/schema/contacts.js",

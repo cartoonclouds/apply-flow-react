@@ -1,14 +1,15 @@
 import Datatable from "@/components/ui/data-table/data-table";
 import { db } from "@/db";
 import {
-  consumePendingCreateApplicationDrawerRequest,
-  subscribeOpenCreateApplicationDrawer,
+  consumePendingCreateApplicationModalRequest,
+  subscribeOpenCreateApplicationModal,
 } from "@/modules/applications/events";
-import React, { useEffect, useState } from "react";
+import { useToast } from "@/modules/notifications/context/ToastContext";
+import React, { useCallback, useEffect, useState } from "react";
 import { ApplicationRepository } from "../../repositories/ApplicationRepository";
 import type { Application } from "../../types";
-import ApplicationDrawer from "../drawer/ApplicationDrawer";
 import type { ApplicationFormValues } from "../forms/ApplicationForm";
+import ApplicationModal from "../modal/ApplicationModal";
 import { getApplicationColumns } from "./ApplicationColumns";
 
 type CompanyOption = {
@@ -21,10 +22,11 @@ function ApplicationsDatatable() {
   const [companies, setCompanies] = useState<CompanyOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [drawerMode, setDrawerMode] = useState<"create" | "edit">("create");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [selectedApplication, setSelectedApplication] =
     useState<Application | null>(null);
+  const { notify } = useToast();
 
   const applicationRepository = React.useMemo(
     () => new ApplicationRepository(db),
@@ -36,25 +38,25 @@ function ApplicationsDatatable() {
       getApplicationColumns({
         onOpenApplication: (application) => {
           setSelectedApplication(application);
-          setDrawerMode("edit");
-          setDrawerOpen(true);
+          setModalMode("edit");
+          setModalOpen(true);
         },
       }),
     [],
   );
 
-  async function loadApplications() {
+  const loadApplications = useCallback(async () => {
     const data = await applicationRepository.list();
     setApplicationsData(data);
     setError(null);
-  }
+  }, [applicationRepository]);
 
-  async function loadCompanies() {
+  const loadCompanies = useCallback(async () => {
     const companyRows = await db.query.companies.findMany();
     setCompanies(
       companyRows.map((company) => ({ id: company.id, name: company.name })),
     );
-  }
+  }, []);
 
   useEffect(() => {
     void Promise.all([loadApplications(), loadCompanies()])
@@ -67,53 +69,77 @@ function ApplicationsDatatable() {
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [loadApplications, loadCompanies]);
 
   useEffect(() => {
-    if (consumePendingCreateApplicationDrawerRequest()) {
-      openCreateDrawer();
+    if (consumePendingCreateApplicationModalRequest()) {
+      openCreateModal();
     }
 
-    return subscribeOpenCreateApplicationDrawer(() => {
-      openCreateDrawer();
+    return subscribeOpenCreateApplicationModal(() => {
+      openCreateModal();
     });
   }, []);
 
-  function openCreateDrawer() {
-    setDrawerMode("create");
+  function openCreateModal() {
+    setModalMode("create");
     setSelectedApplication(null);
-    setDrawerOpen(true);
+    setModalOpen(true);
   }
 
   async function handleSubmit(values: ApplicationFormValues) {
-    if (drawerMode === "create") {
-      await applicationRepository.create({
-        id: crypto.randomUUID(),
-        title: values.title,
-        companyId: values.companyId,
-        url: values.url,
-        locationText: values.locationText,
-        attendanceType: values.attendanceType,
-        employmentType: values.employmentType,
-        description: values.description,
-        priority: values.priority,
-        isArchived: values.isArchived,
-      } as any);
-    } else if (selectedApplication) {
-      await applicationRepository.update(selectedApplication.id, {
-        title: values.title,
-        companyId: values.companyId,
-        url: values.url,
-        locationText: values.locationText,
-        attendanceType: values.attendanceType,
-        employmentType: values.employmentType,
-        description: values.description,
-        priority: values.priority,
-        isArchived: values.isArchived,
-      } as any);
-    }
+    try {
+      if (modalMode === "create") {
+        await applicationRepository.create({
+          id: crypto.randomUUID(),
+          title: values.title,
+          companyId: values.companyId,
+          url: values.url,
+          locationText: values.locationText,
+          attendanceType: values.attendanceType,
+          employmentType: values.employmentType,
+          description: values.description,
+          priority: values.priority,
+          isArchived: values.isArchived,
+        } as any);
 
-    await loadApplications();
+        notify({
+          title: "Application created",
+          description: `${values.title} was added successfully.`,
+          variant: "success",
+        });
+      } else if (selectedApplication) {
+        await applicationRepository.update(selectedApplication.id, {
+          title: values.title,
+          companyId: values.companyId,
+          url: values.url,
+          locationText: values.locationText,
+          attendanceType: values.attendanceType,
+          employmentType: values.employmentType,
+          description: values.description,
+          priority: values.priority,
+          isArchived: values.isArchived,
+        } as any);
+
+        notify({
+          title: "Application updated",
+          description: `${values.title} was saved successfully.`,
+          variant: "success",
+        });
+      }
+
+      await loadApplications();
+    } catch (caught) {
+      const message = caught instanceof Error ? caught.message : String(caught);
+
+      notify({
+        title: "Could not save application",
+        description: message,
+        variant: "error",
+      });
+
+      throw caught;
+    }
   }
 
   if (loading) {
@@ -131,17 +157,17 @@ function ApplicationsDatatable() {
         data={applicationsData}
         onRowClick={(application) => {
           setSelectedApplication(application);
-          setDrawerMode("edit");
-          setDrawerOpen(true);
+          setModalMode("edit");
+          setModalOpen(true);
         }}
       />
 
-      <ApplicationDrawer
-        open={drawerOpen}
-        mode={drawerMode}
+      <ApplicationModal
+        open={modalOpen}
+        mode={modalMode}
         application={selectedApplication}
         companies={companies}
-        onOpenChange={setDrawerOpen}
+        onOpenChange={setModalOpen}
         onSubmit={handleSubmit}
       />
     </div>

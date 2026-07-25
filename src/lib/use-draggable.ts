@@ -1,9 +1,9 @@
 import {
+    type PointerEvent,
     useCallback,
     useEffect,
     useRef,
     useState,
-    type PointerEvent,
 } from "react";
 
 export type DragPosition = {

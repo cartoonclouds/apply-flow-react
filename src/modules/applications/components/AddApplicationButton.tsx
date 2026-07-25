@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { triggerOpenCreateApplicationDrawer } from "@/modules/applications/events";
+import { triggerOpenCreateApplicationModal } from "@/modules/applications/events";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
 
@@ -7,7 +7,7 @@ function AddApplicationButton() {
   const navigate = useNavigate();
 
   async function handleClick() {
-    triggerOpenCreateApplicationDrawer();
+    triggerOpenCreateApplicationModal();
     await navigate({ to: "/applications" });
   }
 

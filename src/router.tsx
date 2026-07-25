@@ -3,22 +3,13 @@ import { ApplicationCalendar } from "@/modules/applications/components/calendar/
 import ApplicationsDatatable from "@/modules/applications/components/datatable/ApplicationsDatatable";
 import CompaniesDatatable from "@/modules/companies/components/datatable/CompaniesDatatable";
 import ContactsDatatable from "@/modules/contacts/components/datatable/ContactsDatatable";
-import InsightsSection from "@/modules/insights/components/InsightsSection";
+import DashboardPage from "@/modules/insights/components/DashboardPage";
+import MapPage from "@/modules/map/components/MapPage";
 import {
   createRootRoute,
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
-import React from "react";
-
-function DashboardPage() {
-  return (
-    <>
-      <InsightsSection />
-      <ApplicationsDatatable />
-    </>
-  );
-}
 
 const rootRoute = createRootRoute({
   component: App,
@@ -54,12 +45,19 @@ const contactsRoute = createRoute({
   component: ContactsDatatable,
 });
 
+const mapRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "map",
+  component: MapPage,
+});
+
 const routeTree = rootRoute.addChildren([
   dashboardRoute,
   applicationsRoute,
   calendarRoute,
   companiesRoute,
   contactsRoute,
+  mapRoute,
 ]);
 
 export const router = createRouter({

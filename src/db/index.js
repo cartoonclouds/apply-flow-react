@@ -5,13 +5,13 @@ import { migrateTauriSqliteDatabase } from "./migrate";
 import { relations } from "./relations.js";
 import {
   DEFAULT_DB_NAME,
+  TAURI_SQLITE_PATH,
   deleteIndexedDbDatabase,
   deleteSqliteDatabase,
   executeSqlite,
   getDatabaseMode,
   invokeTauri,
   isTauriRuntime,
-  TAURI_SQLITE_PATH,
 } from "./runtime";
 
 const dbMode = getDatabaseMode();

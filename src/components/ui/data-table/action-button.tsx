@@ -1,14 +1,14 @@
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-import React from "react";
+import React, { MouseEvent } from "react";
 
 interface ActionButtonItem {
   label: string;
@@ -33,38 +33,52 @@ function isActionButtonSeparator(
 function ActionButton({ children }: ActionButtonProps) {
   const actionButtonChildren = Array.isArray(children) ? children : [children];
 
+  function stopPropagation(event: React.SyntheticEvent) {
+    event.stopPropagation();
+  }
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-        <span className="sr-only">Open menu</span>
-        <MoreHorizontal className="h-4 w-4" />
-      </DropdownMenuTrigger>
+    <div
+      className="inline-flex"
+      onClick={stopPropagation}
+      onMouseDown={stopPropagation}
+      onPointerDown={stopPropagation}
+    >
+      <DropdownMenu>
+        <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+          <span className="sr-only">Open menu</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-fit">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel className="" inset={false}>
-            Actions
-          </DropdownMenuLabel>
+        <DropdownMenuContent align="end" className="w-fit">
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="" inset={false}>
+              Actions
+            </DropdownMenuLabel>
 
-          {actionButtonChildren.map((child, index) => {
-            if (isActionButtonSeparator(child)) {
-              return <DropdownMenuSeparator key={index} className="" />;
-            } else {
-              return (
-                <DropdownMenuItem
-                  key={index}
-                  className=""
-                  inset={false}
-                  onClick={child.onClick ?? (() => {})}
-                >
-                  {child.label}
-                </DropdownMenuItem>
-              );
-            }
-          })}
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+            {actionButtonChildren.map((child, index) => {
+              if (isActionButtonSeparator(child)) {
+                return <DropdownMenuSeparator key={index} className="" />;
+              } else {
+                return (
+                  <DropdownMenuItem
+                    key={index}
+                    className=""
+                    inset={false}
+                    onClick={(event: MouseEvent<HTMLDivElement>) => {
+                      event.stopPropagation();
+                      (child.onClick ?? (() => {}))();
+                    }}
+                  >
+                    {child.label}
+                  </DropdownMenuItem>
+                );
+              }
+            })}
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }
 
